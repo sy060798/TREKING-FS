@@ -6,172 +6,94 @@
 <title>Treking My Rep</title>
 
 <link rel="stylesheet" href="../style.css">
-
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
+body{font-family:sans-serif}
 
-/* =========================
-   WRAPPER (ANTI SILANG)
-========================= */
-.myrep-page{
-    padding:20px;
+.menu-tab{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+.menu-tab button{
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    background:#8e44ad;
+    color:white;
+    cursor:pointer;
 }
 
-/* TITLE */
-.myrep-page h2{
-    text-align:center;
-    margin-bottom:15px;
-}
-
-/* =========================
-   BUTTON
-========================= */
 .btn-group{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
     margin-bottom:10px;
 }
-
 .btn-group button{
     padding:8px 12px;
     border:none;
     border-radius:6px;
     cursor:pointer;
 }
-
 .btn-save{background:#3498db;color:white;}
 .btn-hapus{background:#e74c3c;color:white;}
 .btn-update{background:#f39c12;color:white;}
 
-/* =========================
-   TABLE FIX (ANTI PECAH)
-========================= */
 .table-wrap{
-    overflow-x:auto;
-    overflow-y:auto;
+    overflow:auto;
     max-height:400px;
-    background:rgba(0,0,0,0.3);
-    border-radius:10px;
+    background:rgba(0,0,0,0.2);
 }
 
-/* paksa lebar */
-.myrep-page table{
+table{
     width:100%;
-    min-width:1600px;
+    min-width:1400px;
     border-collapse:collapse;
 }
-
-/* header */
-.myrep-page thead th{
-    background:linear-gradient(90deg,#8e44ad,#9b59b6);
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:2;
-}
-
-/* cell */
-.myrep-page th,
-.myrep-page td{
+th,td{
     padding:8px;
     text-align:center;
     font-size:12px;
-    white-space:nowrap;
 }
-
-/* hover */
-.myrep-page tbody tr:hover{
-    background:rgba(255,255,255,0.08);
-}
-
-/* NOTE biar wrap */
-.myrep-page td:nth-child(16){
-    white-space:normal;
-    max-width:200px;
-}
-
-/* =========================
-   MODAL FIX (CENTER)
-========================= */
-#modalEdit{
-    display:none;
-    position:fixed;
+thead th{
+    background:#8e44ad;
+    color:white;
+    position:sticky;
     top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.6);
-    justify-content:center;
-    align-items:center;
-    z-index:999;
 }
-
-.modal-box{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    width:500px;
-    max-width:95%;
-    animation:fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn{
-    from{opacity:0;transform:scale(0.9);}
-    to{opacity:1;transform:scale(1);}
-}
-
-/* GRID */
-.edit-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.full{
-    grid-column:span 2;
-}
-
-/* INPUT */
-#modalEdit input,
-#modalEdit select{
-    padding:8px;
-    width:100%;
-}
-
-/* BUTTON */
-.modal-btn{
-    margin-top:10px;
-    display:flex;
-    justify-content:space-between;
-}
-
 </style>
-
 </head>
 
-<body class="myrep-page">
+<body>
 
 <h2>📊 TREKING MY REP</h2>
 
-<!-- BUTTON -->
-<div class="btn-group">
-    <button class="btn-save" onclick="exportExcel()">📤 Download</button>
-    <button class="btn-update" onclick="importExcel()">📥 Upload</button>
-    <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
-
-    <input type="file" id="uploadExcel">
+<!-- MENU -->
+<div class="menu-tab">
+    <button onclick="showPage('tracking')">📊 Data Tracking</button>
+    <button onclick="showPage('pivot')">📈 Pivot</button>
 </div>
 
-<!-- TABLE -->
+<!-- PAGE TRACKING -->
+<div id="page-tracking">
+
+<div class="btn-group">
+    <button class="btn-save" onclick="exportExcel()">📤 Download</button>
+    <button class="btn-update" onclick="document.getElementById('uploadExcel').click()">📥 Upload</button>
+    <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
+    <button class="btn-update" onclick="editMassal()">✏ Edit Massal</button>
+
+    <input type="file" id="uploadExcel" hidden>
+</div>
+
 <div class="table-wrap">
 <table id="tableData">
 <thead>
 <tr>
 <th>No</th>
-<th>✔</th>
+<th><input type="checkbox" onclick="checkAll(this)"></th>
 <th>ID</th>
 <th>WO</th>
 <th>Area</th>
@@ -193,42 +115,12 @@
 </table>
 </div>
 
-<!-- ================= MODAL ================= -->
-<div id="modalEdit">
-<div class="modal-box">
-
-<h3 style="text-align:center;">✏ Edit Data</h3>
-
-<div class="edit-grid">
-<input id="edit_wo" class="full">
-<input id="edit_area">
-<input id="edit_wotype">
-
-<input id="edit_tahun">
-<input id="edit_bulan">
-
-<input id="edit_stb">
-<input id="edit_dpp" readonly>
-
-<input id="edit_amount" readonly>
-<input id="edit_tgl" type="date">
-
-<input id="edit_payment" type="date">
-<select id="edit_remark">
-<option>NOT PAID</option>
-<option>PAID</option>
-</select>
-
-<input id="edit_invoice" class="full">
-<input id="edit_note" class="full">
 </div>
 
-<div class="modal-btn">
-<button class="btn-save" onclick="saveEdit()">💾 Save</button>
-<button class="btn-hapus" onclick="closeModal()">❌ Close</button>
-</div>
-
-</div>
+<!-- PAGE PIVOT -->
+<div id="page-pivot" style="display:none;">
+    <h3>📈 Pivot (sementara)</h3>
+    <p>Nanti bisa isi rekap per area / bulan</p>
 </div>
 
 <script src="../js/myrep.js"></script>
