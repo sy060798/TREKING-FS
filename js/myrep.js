@@ -9,7 +9,7 @@ const hargaArea = {
     "deli serdang": 260000
 };
 
-// ================= HITUNG
+// HITUNG
 function hitung(){
     let area = document.getElementById("area").value.toLowerCase();
     let stb = parseInt(document.getElementById("stb").value) || 0;
@@ -23,62 +23,77 @@ function hitung(){
     document.getElementById("amount").value = Math.round(amount);
 }
 
-// ================= TAB
+// TAB
 function showTab(tab){
     document.getElementById("dataTab").style.display = "none";
     document.getElementById("pivotTab").style.display = "none";
-
-    document.getElementById(tab + "Tab").style.display = "block";
+    document.getElementById(tab+"Tab").style.display = "block";
 }
 
-// ================= SIMPAN
+// SIMPAN
 function simpan(){
-    let wo = document.getElementById("wo").value;
-    let area = document.getElementById("area").value;
 
-    if(!wo || !area){
-        alert("WO & Area wajib!");
-        return;
-    }
+    let wo = document.getElementById("wo").value;
 
     if(dataList.find(d => d.wo === wo)){
-        alert("WO sudah ada!");
+        alert("WO DOUBLE ❌");
         return;
     }
 
     let data = {
+        id: "WO-" + Math.floor(Math.random()*100000),
         wo,
-        area,
+        area: document.getElementById("area").value,
+        wotype: document.getElementById("wotype").value,
+        tahun: document.getElementById("tahun").value,
+        bulan: document.getElementById("bulan").value,
+        stb: document.getElementById("stb").value,
         dpp: document.getElementById("dpp").value,
         amount: document.getElementById("amount").value,
-        remark: document.getElementById("remark").value
+        tgl: document.getElementById("tgl").value,
+        payment: document.getElementById("payment").value,
+        remark: document.getElementById("remark").value,
+        invoice: document.getElementById("invoice").value,
+        note: document.getElementById("note").value,
+        checked:false
     };
 
     dataList.push(data);
-
     renderTable();
     clearForm();
+
+    alert("READY ✅");
 }
 
-// ================= RENDER
+// RENDER
 function renderTable(){
     let tbody = document.querySelector("#tableData tbody");
     tbody.innerHTML = "";
 
     dataList.forEach((d,i)=>{
 
-        let badgeRemark = d.remark === "PAID"
-            ? `<span class="badge badge-paid">PAID</span>`
-            : `<span class="badge badge-not">NOT PAID</span>`;
-
         let row = `
         <tr>
             <td>${i+1}</td>
+            <td><input type="checkbox" ${d.checked?"checked":""} onchange="toggleCheck('${d.id}')"></td>
+            <td>${d.id}</td>
             <td>${d.wo}</td>
-            <td><span class="badge badge-area">${d.area}</span></td>
+            <td>${d.area}</td>
+            <td>${d.wotype}</td>
+            <td>${d.tahun}</td>
+            <td>${d.bulan}</td>
+            <td>${d.stb}</td>
             <td>${d.dpp}</td>
             <td>${d.amount}</td>
-            <td>${badgeRemark}</td>
+            <td>${d.tgl}</td>
+            <td>${d.payment}</td>
+            <td>${d.remark}</td>
+            <td>${d.invoice}</td>
+            <td>${d.note}</td>
+            <td>
+                <button onclick="editData('${d.id}')">✏️</button>
+                <button onclick="hapus('${d.id}')">🗑</button>
+            </td>
         </tr>
         `;
 
@@ -86,20 +101,59 @@ function renderTable(){
     });
 }
 
-// ================= FILTER TABLE
-function filterTable(col){
-    let input = document.querySelectorAll("thead input")[col-1];
-    let filter = input.value.toLowerCase();
-    let rows = document.querySelectorAll("#tableData tbody tr");
-
-    rows.forEach(row=>{
-        let text = row.children[col].innerText.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
-    });
+// CHECK
+function toggleCheck(id){
+    let d = dataList.find(x=>x.id===id);
+    d.checked = !d.checked;
 }
 
-// ================= CLEAR
+// HAPUS
+function hapus(id){
+    dataList = dataList.filter(d=>d.id!==id);
+    renderTable();
+}
+
+// HAPUS MASSAL
+function hapusTerpilih(){
+    dataList = dataList.filter(d=>!d.checked);
+    renderTable();
+}
+
+// EDIT
+function editData(id){
+    let d = dataList.find(x=>x.id===id);
+
+    document.getElementById("wo").value = d.wo;
+    document.getElementById("area").value = d.area;
+    document.getElementById("wotype").value = d.wotype;
+    document.getElementById("tahun").value = d.tahun;
+    document.getElementById("bulan").value = d.bulan;
+    document.getElementById("stb").value = d.stb;
+    document.getElementById("tgl").value = d.tgl;
+    document.getElementById("payment").value = d.payment;
+    document.getElementById("invoice").value = d.invoice;
+    document.getElementById("note").value = d.note;
+
+    hitung();
+    hapus(id);
+}
+
+// UPDATE MASSAL
+function updateMassal(){
+    let remark = prompt("Isi Remark (PAID / NOT PAID)");
+    let invoice = prompt("Isi Invoice");
+
+    dataList.forEach(d=>{
+        if(d.checked){
+            if(remark) d.remark = remark;
+            if(invoice) d.invoice = invoice;
+        }
+    });
+
+    renderTable();
+}
+
+// CLEAR
 function clearForm(){
     document.querySelectorAll("input").forEach(i=>i.value="");
-    document.getElementById("remark").value="NOT PAID";
 }
