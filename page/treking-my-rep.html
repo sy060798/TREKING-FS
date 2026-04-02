@@ -1,40 +1,28 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>My Rep</title>
-    <link rel="stylesheet" href="../style.css">
-</head>
+<div class="card-main">
 
-<body>
+<h2>📊 TREKING MY REP</h2>
 
-<div class="bg"></div>
-<div class="overlay"></div>
+<input id="wo" placeholder="WO">
+<input id="area" placeholder="Area (jakarta, surabaya...)">
+<input id="tahun" placeholder="Tahun">
+<input id="bulan" placeholder="Bulan">
 
-<div class="app">
+<input id="stb" type="number" placeholder="STB (isi angka)" oninput="hitung()">
 
-    <div class="card-main">
-        <h2>📊 TREKING MY REP</h2>
+<input id="dpp" placeholder="DPP" readonly>
+<input id="amount" placeholder="AMOUNT" readonly>
 
-        <input id="nama" placeholder="Nama Sales">
-        <input id="customer" placeholder="Nama Customer">
-        <input id="alamat" placeholder="Alamat">
+<input id="tgl" type="date">
+<input id="payment" type="date">
 
-        <select id="status">
-            <option value="">Pilih Status</option>
-            <option value="Deal">Deal</option>
-            <option value="Pending">Pending</option>
-            <option value="Cancel">Cancel</option>
-        </select>
+<select id="remark">
+    <option>NOT PAID</option>
+    <option>PAID</option>
+</select>
 
-        <button onclick="simpan()">💾 Simpan</button>
+<input id="invoice" placeholder="No Invoice">
+<input id="note" placeholder="Note">
 
-        <button onclick="kembali()">⬅ Kembali</button>
-    </div>
+<button onclick="simpan()">💾 Simpan</button>
 
 </div>
-
-<script src="../js/myrep.js"></script>
-
-</body>
-</html>
