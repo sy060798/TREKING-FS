@@ -2,80 +2,101 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
+<!-- =========================
+     🔵 GLOBAL CSS (INDEX)
+     TIDAK DIUBAH
+========================= -->
 <link rel="stylesheet" href="../style.css">
 
-<style>
-body{
-    font-family: Arial;
-}
 
-h2{
+<!-- =========================
+     🟢 CSS KHUSUS MYREP
+     AMAN - TIDAK GANGGU INDEX
+========================= -->
+<style>
+
+/* WRAPPER KHUSUS */
+.myrep-page h2{
     text-align:center;
 }
 
 /* TABLE */
-.table-wrap{
+.myrep-page .table-wrap{
     overflow-x:auto;
     margin-top:20px;
 }
 
-table{
+.myrep-page table{
     width:100%;
     border-collapse:collapse;
 }
 
-thead tr:first-child{
-    background:#8e5ea2;
+/* HEADER */
+.myrep-page thead tr:first-child th{
+    background: linear-gradient(90deg, #8e44ad, #9b59b6);
     color:white;
 }
 
-thead input{
+/* SEARCH */
+.myrep-page thead input{
     width:90%;
     padding:5px;
     font-size:12px;
+    border-radius:5px;
+    border:none;
 }
 
-th, td{
+/* CELL */
+.myrep-page th, 
+.myrep-page td{
     padding:10px;
     text-align:center;
-    border-bottom:1px solid #ddd;
-    font-size:13px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+/* HOVER */
+.myrep-page tbody tr:hover{
+    background: rgba(255,255,255,0.08);
 }
 
 /* BADGE */
-.badge{
+.myrep-page .badge{
     padding:4px 8px;
     border-radius:5px;
     color:white;
     font-size:11px;
 }
 
-.badge-area{
+.myrep-page .badge-area{
     background:#3498db;
 }
 
-.badge-paid{
+.myrep-page .badge-paid{
     background:#2ecc71;
 }
 
-.badge-not{
+.myrep-page .badge-not{
     background:#e67e22;
 }
 
-/* FORM */
-.form-vertical{
+/* FORM GRID */
+.myrep-page .form-vertical{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
     gap:10px;
 }
 
-input, select{
+/* INPUT */
+.myrep-page input, 
+.myrep-page select{
     padding:8px;
 }
 
-.btn-save{
+/* BUTTON */
+.myrep-page .btn-save{
     margin-top:10px;
     padding:10px;
     background:#3498db;
@@ -84,20 +105,31 @@ input, select{
     cursor:pointer;
 }
 
-.top-menu{
+.myrep-page .btn-save:hover{
+    background:#2980b9;
+}
+
+/* MENU */
+.myrep-page .top-menu{
     text-align:center;
     margin-bottom:15px;
 }
 
-.top-menu button{
+.myrep-page .top-menu button{
     margin:5px;
     padding:8px 12px;
 }
+
 </style>
 
 </head>
 
-<body>
+
+<!-- =========================
+     🟡 BODY MYREP
+     (WAJIB ADA CLASS)
+========================= -->
+<body class="myrep-page">
 
 <h2>📊 TREKING MY REP</h2>
 
@@ -130,11 +162,15 @@ input, select{
 
 <button class="btn-save" onclick="simpan()">💾 Simpan</button>
 
-<!-- DATA -->
+
+<!-- =========================
+     📋 DATA TABLE
+========================= -->
 <div id="dataTab">
 
 <div class="table-wrap">
 <table id="tableData">
+
 <thead>
 <tr>
     <th>No</th>
@@ -156,15 +192,24 @@ input, select{
 </thead>
 
 <tbody></tbody>
+
 </table>
 </div>
 
 </div>
 
+
+<!-- =========================
+     📈 PIVOT
+========================= -->
 <div id="pivotTab" style="display:none">
     <p>Pivot coming soon...</p>
 </div>
 
+
+<!-- =========================
+     🟠 JAVASCRIPT
+========================= -->
 <script src="../js/myrep.js"></script>
 
 </body>
