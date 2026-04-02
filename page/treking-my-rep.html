@@ -1,28 +1,46 @@
-<div class="card-main">
+// LOAD PAGE (UNTUK GITHUB)
+function loadTracking(page){
+    fetch(page)
+    .then(res => res.text())
+    .then(html => {
+        document.getElementById("content").innerHTML = html;
+    })
+    .catch(() => alert("Gagal load halaman"));
+}
 
-<h2>📊 TREKING MY REP</h2>
+// DATA HARGA
+const hargaArea = {
+    "purwakarta": 280000,
+    "surabaya": 280000,
+    "sidoarjo": 280000,
+    "pamatang siantar": 245000,
+    "jakarta": 300000,
+    "deli serdang": 260000
+};
 
-<input id="wo" placeholder="WO">
-<input id="area" placeholder="Area (jakarta, surabaya...)">
-<input id="tahun" placeholder="Tahun">
-<input id="bulan" placeholder="Bulan">
+// HITUNG OTOMATIS
+function hitung(){
+    let area = document.getElementById("area").value.toLowerCase();
+    let stb = parseInt(document.getElementById("stb").value) || 0;
 
-<input id="stb" type="number" placeholder="STB (isi angka)" oninput="hitung()">
+    let harga = hargaArea[area] || 0;
 
-<input id="dpp" placeholder="DPP" readonly>
-<input id="amount" placeholder="AMOUNT" readonly>
+    let dpp = harga + (stb * 50000);
+    let amount = dpp * 1.11;
 
-<input id="tgl" type="date">
-<input id="payment" type="date">
+    document.getElementById("dpp").value = dpp;
+    document.getElementById("amount").value = Math.round(amount);
+}
 
-<select id="remark">
-    <option value="NOT PAID">NOT PAID</option>
-    <option value="PAID">PAID</option>
-</select>
+// SIMPAN (sementara)
+function simpan(){
+    let data = {
+        wo: document.getElementById("wo").value,
+        area: document.getElementById("area").value,
+        dpp: document.getElementById("dpp").value,
+        amount: document.getElementById("amount").value
+    };
 
-<input id="invoice" placeholder="No Invoice">
-<input id="note" placeholder="Note">
-
-<button onclick="simpan()">💾 Simpan</button>
-
-</div>
+    console.log(data);
+    alert("Data siap 🚀 (next kirim ke server)");
+}
