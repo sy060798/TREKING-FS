@@ -54,32 +54,57 @@
     padding:8px 12px;
 }
 
-/* TABLE */
+/* =========================
+   TABLE FIX (ANTI SILANG)
+========================= */
+
 .myrep-page .table-wrap{
-    overflow:auto;
+    overflow-x:auto;
+    overflow-y:auto;
     margin-top:20px;
-    max-height:300px;
+    max-height:350px;
 }
 
+/* paksa tabel lebar */
 .myrep-page table{
     width:100%;
     border-collapse:collapse;
+    min-width:1600px; /* penting */
 }
 
+/* header */
 .myrep-page thead tr:first-child th{
     background: linear-gradient(90deg, #8e44ad, #9b59b6);
     color:white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
+/* isi tabel */
 .myrep-page th, 
 .myrep-page td{
     padding:8px;
     text-align:center;
     border-bottom:1px solid rgba(255,255,255,0.1);
+    white-space: nowrap; /* ini kunci */
+    font-size:12px;
 }
 
+/* hover */
 .myrep-page tbody tr:hover{
     background: rgba(255,255,255,0.08);
+}
+
+/* kolom note boleh panjang */
+.myrep-page td:nth-child(16){
+    white-space: normal;
+    max-width:200px;
+}
+
+/* tombol aksi */
+.myrep-page td:last-child{
+    white-space: nowrap;
 }
 
 </style>
@@ -157,6 +182,7 @@
 </div>
 </div>
 
+<!-- PIVOT -->
 <div id="pivotTab" style="display:none">
     <p>Pivot coming soon...</p>
 </div>
