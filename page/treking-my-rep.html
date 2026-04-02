@@ -1,90 +1,170 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Treking My Rep</title>
+<meta charset="UTF-8">
+<title>Treking My Rep</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+body{
+    font-family: Arial;
+}
+
+h2{
+    text-align:center;
+}
+
+/* TABLE */
+.table-wrap{
+    overflow-x:auto;
+    margin-top:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead tr:first-child{
+    background:#8e5ea2;
+    color:white;
+}
+
+thead input{
+    width:90%;
+    padding:5px;
+    font-size:12px;
+}
+
+th, td{
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+    font-size:13px;
+}
+
+/* BADGE */
+.badge{
+    padding:4px 8px;
+    border-radius:5px;
+    color:white;
+    font-size:11px;
+}
+
+.badge-area{
+    background:#3498db;
+}
+
+.badge-paid{
+    background:#2ecc71;
+}
+
+.badge-not{
+    background:#e67e22;
+}
+
+/* FORM */
+.form-vertical{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:10px;
+}
+
+input, select{
+    padding:8px;
+}
+
+.btn-save{
+    margin-top:10px;
+    padding:10px;
+    background:#3498db;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.top-menu{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.top-menu button{
+    margin:5px;
+    padding:8px 12px;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="bg"></div>
-<div class="overlay"></div>
+<h2>📊 TREKING MY REP</h2>
 
-<div class="page-wrap">
+<div class="top-menu">
+    <button onclick="showTab('data')">📋 Data</button>
+    <button onclick="showTab('pivot')">📈 Pivot</button>
+</div>
 
-    <div class="card-main form-card">
+<div class="form-vertical">
+    <input id="wo" placeholder="WO">
+    <input id="area" placeholder="Area">
+    <input id="tahun" placeholder="Tahun">
 
-        <h2>📊 TREKING MY REP</h2>
+    <input id="bulan" placeholder="Bulan">
+    <input id="stb" type="number" placeholder="STB" oninput="hitung()">
+    <input id="dpp" placeholder="DPP" readonly>
 
-        <!-- MENU ATAS -->
-        <div class="top-menu">
-            <button onclick="showTab('data')">📋 Data Treking</button>
-            <button onclick="showTab('pivot')">📈 Pivot</button>
-        </div>
+    <input id="amount" placeholder="Amount" readonly>
+    <input id="tgl" type="date">
+    <input id="payment" type="date">
 
-        <!-- FORM -->
-        <div class="form-vertical">
+    <select id="remark">
+        <option>NOT PAID</option>
+        <option>PAID</option>
+    </select>
 
-            <input id="wo" placeholder="WO">
-            <input id="area" placeholder="Area">
+    <input id="invoice" placeholder="Invoice">
+    <input id="note" placeholder="Note">
+</div>
 
-            <input id="tahun" placeholder="Tahun">
-            <input id="bulan" placeholder="Bulan">
+<button class="btn-save" onclick="simpan()">💾 Simpan</button>
 
-            <input id="stb" type="number" placeholder="STB" oninput="hitung()">
+<!-- DATA -->
+<div id="dataTab">
 
-            <input id="dpp" placeholder="DPP" readonly>
-            <input id="amount" placeholder="AMOUNT" readonly>
+<div class="table-wrap">
+<table id="tableData">
+<thead>
+<tr>
+    <th>No</th>
+    <th>WO</th>
+    <th>Area</th>
+    <th>DPP</th>
+    <th>Amount</th>
+    <th>Remark</th>
+</tr>
 
-            <input id="tgl" type="date">
-            <input id="payment" type="date">
+<tr>
+    <th></th>
+    <th><input onkeyup="filterTable(1)"></th>
+    <th><input onkeyup="filterTable(2)"></th>
+    <th><input onkeyup="filterTable(3)"></th>
+    <th><input onkeyup="filterTable(4)"></th>
+    <th><input onkeyup="filterTable(5)"></th>
+</tr>
+</thead>
 
-            <select id="remark">
-                <option value="NOT PAID">NOT PAID</option>
-                <option value="PAID">PAID</option>
-            </select>
-
-            <input id="invoice" placeholder="No Invoice">
-            <input id="note" placeholder="Note">
-
-        </div>
-
-        <button class="btn-save" onclick="simpan()">💾 Simpan</button>
-
-        <!-- DATA TABLE -->
-        <div id="dataTab" class="tab-content">
-
-            <div class="table-wrap">
-                <table id="tableData">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>WO</th>
-                            <th>Area</th>
-                            <th>DPP</th>
-                            <th>Amount</th>
-                            <th>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <!-- PIVOT -->
-        <div id="pivotTab" class="tab-content" style="display:none;">
-            <p>📈 Fitur Pivot (Coming Soon)</p>
-        </div>
-
-    </div>
+<tbody></tbody>
+</table>
+</div>
 
 </div>
 
-<!-- JS -->
+<div id="pivotTab" style="display:none">
+    <p>Pivot coming soon...</p>
+</div>
+
 <script src="../js/myrep.js"></script>
 
 </body>
