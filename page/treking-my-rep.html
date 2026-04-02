@@ -9,12 +9,13 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body{font-family:sans-serif}
+body{font-family:sans-serif;margin:20px}
 
+/* MENU */
 .menu-tab{
     display:flex;
     gap:10px;
-    margin-bottom:10px;
+    margin-bottom:15px;
 }
 .menu-tab button{
     padding:8px 12px;
@@ -25,6 +26,7 @@ body{font-family:sans-serif}
     cursor:pointer;
 }
 
+/* BUTTON */
 .btn-group{
     display:flex;
     gap:10px;
@@ -41,12 +43,13 @@ body{font-family:sans-serif}
 .btn-hapus{background:#e74c3c;color:white;}
 .btn-update{background:#f39c12;color:white;}
 
+/* TABLE */
 .table-wrap{
     overflow:auto;
     max-height:400px;
-    background:rgba(0,0,0,0.2);
+    background:rgba(0,0,0,0.1);
+    border-radius:8px;
 }
-
 table{
     width:100%;
     min-width:1400px;
@@ -56,6 +59,7 @@ th,td{
     padding:8px;
     text-align:center;
     font-size:12px;
+    border-bottom:1px solid #ddd;
 }
 thead th{
     background:#8e44ad;
@@ -63,7 +67,16 @@ thead th{
     position:sticky;
     top:0;
 }
+
+/* PAGE */
+.page{
+    display:none;
+}
+.page.active{
+    display:block;
+}
 </style>
+
 </head>
 
 <body>
@@ -76,53 +89,56 @@ thead th{
     <button onclick="showPage('pivot')">📈 Pivot</button>
 </div>
 
-<!-- PAGE TRACKING -->
-<div id="page-tracking">
+<!-- ================= PAGE TRACKING ================= -->
+<div id="page-tracking" class="page active">
 
-<div class="btn-group">
-    <button class="btn-save" onclick="exportExcel()">📤 Download</button>
-    <button class="btn-update" onclick="document.getElementById('uploadExcel').click()">📥 Upload</button>
-    <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
-    <button class="btn-update" onclick="editMassal()">✏ Edit Massal</button>
+    <!-- BUTTON -->
+    <div class="btn-group">
+        <button class="btn-save" onclick="exportExcel()">📤 Download</button>
+        <button class="btn-update" onclick="document.getElementById('uploadExcel').click()">📥 Upload</button>
+        <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
+        <button class="btn-update" onclick="editMassal()">✏ Edit Massal</button>
 
-    <input type="file" id="uploadExcel" hidden>
+        <input type="file" id="uploadExcel" hidden>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+        <table id="tableData">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th><input type="checkbox" onclick="checkAll(this)"></th>
+                    <th>ID</th>
+                    <th>WO</th>
+                    <th>Area</th>
+                    <th>WO Type</th>
+                    <th>Tahun</th>
+                    <th>Month</th>
+                    <th>STB</th>
+                    <th>DPP</th>
+                    <th>Amount</th>
+                    <th>Tgl</th>
+                    <th>Payment</th>
+                    <th>Remark</th>
+                    <th>Invoice</th>
+                    <th>Note</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
 </div>
 
-<div class="table-wrap">
-<table id="tableData">
-<thead>
-<tr>
-<th>No</th>
-<th><input type="checkbox" onclick="checkAll(this)"></th>
-<th>ID</th>
-<th>WO</th>
-<th>Area</th>
-<th>WO Type</th>
-<th>Tahun</th>
-<th>Month</th>
-<th>STB</th>
-<th>DPP</th>
-<th>Amount</th>
-<th>Tgl</th>
-<th>Payment</th>
-<th>Remark</th>
-<th>Invoice</th>
-<th>Note</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<!-- ================= PAGE PIVOT ================= -->
+<div id="page-pivot" class="page">
+    <h3>📈 Pivot</h3>
+    <p>Isi pivot nanti di sini</p>
 </div>
 
-</div>
-
-<!-- PAGE PIVOT -->
-<div id="page-pivot" style="display:none;">
-    <h3>📈 Pivot (sementara)</h3>
-    <p>Nanti bisa isi rekap per area / bulan</p>
-</div>
-
+<!-- JS -->
 <script src="../js/myrep.js"></script>
 
 </body>
