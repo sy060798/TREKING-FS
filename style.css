@@ -1,96 +1,86 @@
-/* RESET */
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    height: 100vh;
-    overflow: hidden;
 }
 
-/* BACKGROUND GAMBAR */
+/* BACKGROUND */
 .bg {
     position: fixed;
     width: 100%;
     height: 100%;
-    background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470') no-repeat center center/cover;
+    background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470') no-repeat center/cover;
     z-index: -2;
 }
 
-/* OVERLAY GELAP */
+/* OVERLAY */
 .overlay {
     position: fixed;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     z-index: -1;
 }
 
-/* APP CONTAINER */
+/* APP CENTER */
 .app {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    height: 100%;
-    color: white;
+    align-items: center;
+    height: 100vh;
+}
+
+/* CARD HITAM */
+.card-main {
+    background: rgba(0,0,0,0.75);
+    padding: 30px;
+    border-radius: 15px;
     text-align: center;
-    padding: 20px;
+    color: white;
+    width: 320px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-/* HEADER */
-.header h1 {
+/* TITLE */
+.card-main h1 {
     margin: 0;
-    font-size: 28px;
-    letter-spacing: 2px;
+    font-size: 24px;
 }
 
-.header p {
-    margin: 5px 0 20px;
-    font-size: 14px;
+.card-main p {
+    margin-bottom: 20px;
+    font-size: 13px;
     opacity: 0.8;
 }
 
 /* MENU */
-.menu {
-    width: 100%;
-    max-width: 300px;
-}
-
 .menu button {
     width: 100%;
-    padding: 15px;
+    padding: 12px;
     margin: 8px 0;
     border: none;
     border-radius: 10px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
-    backdrop-filter: blur(10px);
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
     transition: 0.3s;
 }
 
-/* HOVER EFFECT */
+/* LOGO */
+.menu img {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+}
+
+/* HOVER */
 .menu button:hover {
     background: #1abc9c;
-    transform: scale(1.05);
-}
-
-/* CONTENT BOX */
-.content {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 400px;
-}
-
-/* WELCOME CARD */
-.welcome {
-    background: rgba(255,255,255,0.15);
-    padding: 20px;
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-}
-
-/* INPUT & BUTTON */
-input, button {
-    outline: none;
+    transform: scale(1.03);
 }
