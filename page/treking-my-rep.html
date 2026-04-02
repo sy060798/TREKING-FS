@@ -1,28 +1,37 @@
-<div class="card-main">
+<div class="page-wrap">
 
-<h2>📊 TREKING MY REP</h2>
+    <div class="card-main form-card">
 
-<input id="wo" placeholder="WO">
-<input id="area" placeholder="Area (jakarta, surabaya...)">
-<input id="tahun" placeholder="Tahun">
-<input id="bulan" placeholder="Bulan">
+        <h2>📊 TREKING MY REP</h2>
 
-<input id="stb" type="number" placeholder="STB (isi angka)" oninput="hitung()">
+        <div class="form-grid">
 
-<input id="dpp" placeholder="DPP" readonly>
-<input id="amount" placeholder="AMOUNT" readonly>
+            <input id="wo" placeholder="WO">
+            <input id="area" placeholder="Area (jakarta, surabaya...)">
 
-<input id="tgl" type="date">
-<input id="payment" type="date">
+            <input id="tahun" placeholder="Tahun">
+            <input id="bulan" placeholder="Bulan">
 
-<select id="remark">
-    <option value="NOT PAID">NOT PAID</option>
-    <option value="PAID">PAID</option>
-</select>
+            <input id="stb" type="number" placeholder="STB" oninput="hitung()">
+            <input id="dpp" placeholder="DPP" readonly>
 
-<input id="invoice" placeholder="No Invoice">
-<input id="note" placeholder="Note">
+            <input id="amount" placeholder="AMOUNT" readonly>
 
-<button onclick="simpan()">💾 Simpan</button>
+            <input id="tgl" type="date">
+            <input id="payment" type="date">
+
+            <select id="remark">
+                <option value="NOT PAID">NOT PAID</option>
+                <option value="PAID">PAID</option>
+            </select>
+
+            <input id="invoice" placeholder="No Invoice">
+            <input id="note" placeholder="Note">
+
+        </div>
+
+        <button class="btn-save" onclick="simpan()">💾 Simpan</button>
+
+    </div>
 
 </div>
