@@ -12,49 +12,47 @@
 
 <style>
 
-.myrep-page h2{
+/* =========================
+   PAGE
+========================= */
+body{
+    padding:20px;
+}
+
+h2{
     text-align:center;
 }
 
-/* FORM */
-.form-vertical{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap:10px;
-}
-
-input, select{
-    padding:8px;
-}
-
-/* BUTTON */
-.btn-save{
-    margin-top:10px;
-    padding:10px;
-    background:#3498db;
-    color:white;
+/* =========================
+   BUTTON
+========================= */
+.btn{
+    padding:8px 12px;
     border:none;
     cursor:pointer;
+    border-radius:6px;
 }
 
-.btn-save:hover{
-    background:#2980b9;
-}
+.btn-save{background:#3498db;color:white;}
+.btn-hapus{background:#e74c3c;color:white;}
+.btn-update{background:#f39c12;color:white;}
 
-/* TABLE */
+/* =========================
+   TABLE
+========================= */
 .table-wrap{
     overflow:auto;
-    margin-top:20px;
     max-height:350px;
+    margin-top:15px;
 }
 
 table{
     width:100%;
+    min-width:1400px;
     border-collapse:collapse;
-    min-width:1600px;
 }
 
-th, td{
+th,td{
     padding:8px;
     text-align:center;
     white-space:nowrap;
@@ -62,58 +60,67 @@ th, td{
 }
 
 thead th{
-    background: linear-gradient(90deg,#8e44ad,#9b59b6);
+    background:linear-gradient(90deg,#8e44ad,#9b59b6);
     color:white;
     position:sticky;
     top:0;
 }
 
 tbody tr:hover{
-    background:rgba(255,255,255,0.08);
+    background:rgba(0,0,0,0.05);
+}
+
+/* =========================
+   MODAL
+========================= */
+#modalEdit{
+    display:none;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    width:500px;
+}
+
+.edit-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.full{
+    grid-column: span 2;
+}
+
+input, select{
+    padding:8px;
+    width:100%;
 }
 
 </style>
 
 </head>
 
-<body class="myrep-page">
+<body>
 
 <h2>📊 TREKING MY REP</h2>
 
-<!-- FORM -->
-<div class="form-vertical">
-    <input id="wo" placeholder="WO">
-    <input id="area" placeholder="Area">
-    <input id="wotype" placeholder="WO Type">
-
-    <input id="tahun" placeholder="Tahun">
-    <input id="bulan" placeholder="Month">
-    <input id="stb" type="number" placeholder="STB" oninput="hitung()">
-
-    <input id="dpp" placeholder="DPP" readonly>
-    <input id="amount" placeholder="Amount" readonly>
-    <input id="tgl" type="date">
-
-    <input id="payment" type="date">
-
-    <select id="remark">
-        <option>NOT PAID</option>
-        <option>PAID</option>
-    </select>
-
-    <input id="invoice" placeholder="Invoice">
-    <input id="note" placeholder="Note">
-</div>
-
-<button class="btn-save" onclick="simpan()">💾 Simpan</button>
-<button onclick="hapusTerpilih()">🗑 Hapus Terpilih</button>
-<button onclick="updateMassal()">⚡ Update Massal</button>
-
-<!-- EXCEL -->
-<div style="margin-top:10px;">
-    <input type="file" id="uploadExcel">
-    <button onclick="importExcel()">📥 Upload Excel</button>
-    <button onclick="exportExcel()">📤 Download Excel</button>
+<!-- BUTTON -->
+<div style="margin-bottom:10px;">
+<button class="btn btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
+<input type="file" id="uploadExcel">
+<button class="btn btn-update" onclick="importExcel()">📥 Upload</button>
+<button class="btn btn-save" onclick="exportExcel()">📤 Download</button>
 </div>
 
 <!-- TABLE -->
@@ -142,6 +149,41 @@ tbody tr:hover{
 </thead>
 <tbody></tbody>
 </table>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div id="modalEdit">
+<div class="modal-box">
+
+<h3>Edit Data</h3>
+
+<div class="edit-grid">
+<input id="edit_wo" class="full">
+<input id="edit_area">
+<input id="edit_wotype">
+<input id="edit_tahun">
+<input id="edit_bulan">
+<input id="edit_stb">
+<input id="edit_dpp" readonly>
+<input id="edit_amount" readonly>
+<input id="edit_tgl" type="date">
+<input id="edit_payment" type="date">
+
+<select id="edit_remark">
+<option>NOT PAID</option>
+<option>PAID</option>
+</select>
+
+<input id="edit_invoice" class="full">
+<input id="edit_note" class="full">
+</div>
+
+<br>
+
+<button class="btn btn-save" onclick="saveEdit()">Save</button>
+<button class="btn btn-hapus" onclick="closeModal()">Close</button>
+
+</div>
 </div>
 
 <script src="../js/myrep.js"></script>
