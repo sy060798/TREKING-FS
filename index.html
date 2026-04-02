@@ -19,18 +19,18 @@
 
         <div class="menu">
 
-            <button onclick="loadTracking('MYREP')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/MyRepublic_logo.png">
+            <button onclick="goPage('page/treking-my-rep.html')">
+                <img src="img/myrep.png">
                 MyRepublic
             </button>
 
-            <button onclick="loadTracking('FS')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/FiberStar_logo.png">
+            <button onclick="goPage('page/treking-fs.html')">
+                <img src="img/fs.png">
                 FiberStar
             </button>
 
-            <button onclick="loadTracking('XL')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/XL_Axiata_logo.svg/512px-XL_Axiata_logo.svg.png">
+            <button onclick="goPage('page/treking-xl.html')">
+                <img src="img/xl.png">
                 XL Axiata
             </button>
 
@@ -39,7 +39,11 @@
 
 </div>
 
-<script src="js/myrep.js"></script>
+<script>
+function goPage(url){
+    window.location.href = url;
+}
+</script>
 
 </body>
 </html>
