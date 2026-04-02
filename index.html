@@ -8,32 +8,94 @@
 <link rel="stylesheet" href="../style.css">
 
 <style>
-.myrep-page h2{text-align:center;}
-.myrep-page .form-vertical{
+
+/* WRAP */
+.myrep-page{
+    padding:20px;
+}
+
+/* TITLE */
+.myrep-page h2{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+/* SECTION BOX */
+.box{
+    background:rgba(255,255,255,0.05);
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+/* FORM GRID */
+.form-vertical{
     display:grid;
     grid-template-columns: repeat(3,1fr);
     gap:10px;
 }
-.myrep-page input,.myrep-page select{padding:8px;}
-.myrep-page .btn-save{
-    margin-top:10px;padding:10px;background:#3498db;color:white;border:none;
+
+/* INPUT */
+input, select{
+    padding:8px;
+    width:100%;
 }
-.myrep-page .table-wrap{
-    overflow:auto;margin-top:20px;max-height:350px;
+
+/* BUTTON GROUP */
+.btn-group{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
 }
-.myrep-page table{
-    width:100%;border-collapse:collapse;min-width:1600px;
+
+.btn-group button{
+    padding:8px 12px;
+    cursor:pointer;
 }
-.myrep-page th,.myrep-page td{
-    padding:8px;text-align:center;white-space:nowrap;font-size:12px;
+
+/* FILTER */
+.filter-box{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
 }
-.myrep-page thead th{
+
+.filter-box input{
+    flex:1;
+    min-width:150px;
+}
+
+/* TABLE */
+.table-wrap{
+    overflow:auto;
+    max-height:350px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1600px;
+}
+
+th, td{
+    padding:8px;
+    text-align:center;
+    white-space:nowrap;
+    font-size:12px;
+}
+
+thead th{
     background:linear-gradient(90deg,#8e44ad,#9b59b6);
-    color:white;position:sticky;top:0;
+    color:white;
+    position:sticky;
+    top:0;
 }
-.myrep-page tbody tr:hover{
+
+tbody tr:hover{
     background:rgba(255,255,255,0.08);
 }
+
 </style>
 
 <!-- XLSX -->
@@ -46,7 +108,7 @@
 <h2>📊 TREKING MY REP</h2>
 
 <!-- FILTER -->
-<div>
+<div class="box filter-box">
     <input id="f_wo" placeholder="Filter WO" onkeyup="applyFilter()">
     <input id="f_tahun" placeholder="Tahun" onkeyup="applyFilter()">
     <input id="f_bulan" placeholder="Bulan" onkeyup="applyFilter()">
@@ -54,44 +116,67 @@
 </div>
 
 <!-- FORM -->
+<div class="box">
 <div class="form-vertical">
     <input id="wo" placeholder="WO">
     <input id="area" placeholder="Area">
     <input id="wotype" placeholder="WO Type">
+
     <input id="tahun" placeholder="Tahun">
     <input id="bulan" placeholder="Month">
     <input id="stb" type="number" placeholder="STB" oninput="hitung()">
+
     <input id="dpp" readonly placeholder="DPP">
     <input id="amount" readonly placeholder="Amount">
     <input id="tgl" type="date">
+
     <input id="payment" type="date">
+
     <select id="remark">
         <option>NOT PAID</option>
         <option>PAID</option>
     </select>
+
     <input id="invoice" placeholder="Invoice">
     <input id="note" placeholder="Note">
 </div>
 
-<button onclick="simpan()">💾 Simpan</button>
-<button onclick="hapusTerpilih()">🗑 Hapus Terpilih</button>
-<button onclick="updateMassal()">⚡ Update Massal</button>
+<div class="btn-group">
+    <button onclick="simpan()">💾 Simpan</button>
+    <button onclick="hapusTerpilih()">🗑 Hapus Terpilih</button>
+    <button onclick="updateMassal()">⚡ Update Massal</button>
+</div>
+</div>
 
 <!-- EXCEL -->
-<div>
+<div class="box btn-group">
     <input type="file" id="uploadExcel">
     <button onclick="importExcel()">📥 Upload Excel</button>
     <button onclick="exportExcel()">📤 Download Excel</button>
 </div>
 
 <!-- TABLE -->
-<div class="table-wrap">
+<div class="box table-wrap">
 <table id="tableData">
 <thead>
 <tr>
-<th>No</th><th>✔</th><th>ID</th><th>WO</th><th>Area</th><th>WO Type</th>
-<th>Tahun</th><th>Month</th><th>STB</th><th>DPP</th><th>Amount</th>
-<th>Tgl</th><th>Payment</th><th>Remark</th><th>Invoice</th><th>Note</th><th>Aksi</th>
+<th>No</th>
+<th>✔</th>
+<th>ID</th>
+<th>WO</th>
+<th>Area</th>
+<th>WO Type</th>
+<th>Tahun</th>
+<th>Month</th>
+<th>STB</th>
+<th>DPP</th>
+<th>Amount</th>
+<th>Tgl</th>
+<th>Payment</th>
+<th>Remark</th>
+<th>Invoice</th>
+<th>Note</th>
+<th>Aksi</th>
 </tr>
 </thead>
 <tbody></tbody>
