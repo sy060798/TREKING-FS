@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <title>Treking My Rep</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
 
-<!-- BACKGROUND -->
 <div class="bg"></div>
 <div class="overlay"></div>
 
-<!-- CONTENT -->
 <div class="page-wrap">
 
     <div class="card-main form-card">
@@ -26,11 +25,11 @@
             <button onclick="showTab('pivot')">📈 Pivot</button>
         </div>
 
-        <!-- FORM INPUT -->
+        <!-- FORM -->
         <div class="form-vertical">
 
             <input id="wo" placeholder="WO">
-            <input id="area" placeholder="Area (jakarta, surabaya...)">
+            <input id="area" placeholder="Area">
 
             <input id="tahun" placeholder="Tahun">
             <input id="bulan" placeholder="Bulan">
@@ -53,10 +52,9 @@
 
         </div>
 
-        <!-- BUTTON -->
         <button class="btn-save" onclick="simpan()">💾 Simpan</button>
 
-        <!-- TAB DATA -->
+        <!-- DATA TABLE -->
         <div id="dataTab" class="tab-content">
 
             <div class="table-wrap">
@@ -77,7 +75,7 @@
 
         </div>
 
-        <!-- TAB PIVOT -->
+        <!-- PIVOT -->
         <div id="pivotTab" class="tab-content" style="display:none;">
             <p>📈 Fitur Pivot (Coming Soon)</p>
         </div>
