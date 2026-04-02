@@ -1,11 +1,5 @@
-// =======================
-// DATA STORAGE
-// =======================
 let dataList = [];
 
-// =======================
-// HARGA AREA
-// =======================
 const hargaArea = {
     "purwakarta": 280000,
     "surabaya": 280000,
@@ -15,9 +9,7 @@ const hargaArea = {
     "deli serdang": 260000
 };
 
-// =======================
-// HITUNG OTOMATIS
-// =======================
+// ================= HITUNG
 function hitung(){
     let area = document.getElementById("area").value.toLowerCase();
     let stb = parseInt(document.getElementById("stb").value) || 0;
@@ -31,100 +23,83 @@ function hitung(){
     document.getElementById("amount").value = Math.round(amount);
 }
 
-// =======================
-// SWITCH TAB
-// =======================
+// ================= TAB
 function showTab(tab){
     document.getElementById("dataTab").style.display = "none";
     document.getElementById("pivotTab").style.display = "none";
 
-    if(tab === "data"){
-        document.getElementById("dataTab").style.display = "block";
-    } else {
-        document.getElementById("pivotTab").style.display = "block";
-    }
+    document.getElementById(tab + "Tab").style.display = "block";
 }
 
-// =======================
-// SIMPAN DATA
-// =======================
+// ================= SIMPAN
 function simpan(){
-
     let wo = document.getElementById("wo").value;
     let area = document.getElementById("area").value;
 
-    // VALIDASI SEDERHANA
-    if(wo === "" || area === ""){
-        alert("WO & Area wajib diisi!");
+    if(!wo || !area){
+        alert("WO & Area wajib!");
         return;
     }
 
-    // CEK DUPLIKAT WO
-    let duplikat = dataList.find(d => d.wo === wo);
-    if(duplikat){
-        alert("WO sudah ada (duplikat!)");
+    if(dataList.find(d => d.wo === wo)){
+        alert("WO sudah ada!");
         return;
     }
 
     let data = {
-        wo: wo,
-        area: area,
-        tahun: document.getElementById("tahun").value,
-        bulan: document.getElementById("bulan").value,
-        stb: document.getElementById("stb").value,
+        wo,
+        area,
         dpp: document.getElementById("dpp").value,
         amount: document.getElementById("amount").value,
-        tgl: document.getElementById("tgl").value,
-        payment: document.getElementById("payment").value,
-        remark: document.getElementById("remark").value,
-        invoice: document.getElementById("invoice").value,
-        note: document.getElementById("note").value
+        remark: document.getElementById("remark").value
     };
 
     dataList.push(data);
 
     renderTable();
     clearForm();
-
-    alert("Data berhasil disimpan ✅");
 }
 
-// =======================
-// RENDER TABLE
-// =======================
+// ================= RENDER
 function renderTable(){
     let tbody = document.querySelector("#tableData tbody");
     tbody.innerHTML = "";
 
-    dataList.forEach((d, i) => {
+    dataList.forEach((d,i)=>{
+
+        let badgeRemark = d.remark === "PAID"
+            ? `<span class="badge badge-paid">PAID</span>`
+            : `<span class="badge badge-not">NOT PAID</span>`;
+
         let row = `
         <tr>
             <td>${i+1}</td>
             <td>${d.wo}</td>
-            <td>${d.area}</td>
+            <td><span class="badge badge-area">${d.area}</span></td>
             <td>${d.dpp}</td>
             <td>${d.amount}</td>
-            <td>${d.remark}</td>
+            <td>${badgeRemark}</td>
         </tr>
         `;
+
         tbody.innerHTML += row;
     });
 }
 
-// =======================
-// CLEAR FORM
-// =======================
+// ================= FILTER TABLE
+function filterTable(col){
+    let input = document.querySelectorAll("thead input")[col-1];
+    let filter = input.value.toLowerCase();
+    let rows = document.querySelectorAll("#tableData tbody tr");
+
+    rows.forEach(row=>{
+        let text = row.children[col].innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+}
+
+// ================= CLEAR
 function clearForm(){
-    document.getElementById("wo").value = "";
-    document.getElementById("area").value = "";
-    document.getElementById("tahun").value = "";
-    document.getElementById("bulan").value = "";
-    document.getElementById("stb").value = "";
-    document.getElementById("dpp").value = "";
-    document.getElementById("amount").value = "";
-    document.getElementById("tgl").value = "";
-    document.getElementById("payment").value = "";
-    document.getElementById("remark").value = "NOT PAID";
-    document.getElementById("invoice").value = "";
-    document.getElementById("note").value = "";
+    document.querySelectorAll("input").forEach(i=>i.value="");
+    document.getElementById("remark").value="NOT PAID";
 }
