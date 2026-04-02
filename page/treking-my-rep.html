@@ -1,141 +1,87 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Treking My Rep</title>
+    <meta charset="UTF-8">
+    <title>Treking My Rep</title>
 
-<link rel="stylesheet" href="../style.css">
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<style>
-body{font-family:sans-serif;margin:20px}
-
-/* MENU */
-.menu-tab{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-}
-.menu-tab button{
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    background:#8e44ad;
-    color:white;
-    cursor:pointer;
-}
-
-/* BUTTON */
-.btn-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:10px;
-}
-.btn-group button{
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-.btn-save{background:#3498db;color:white;}
-.btn-hapus{background:#e74c3c;color:white;}
-.btn-update{background:#f39c12;color:white;}
-
-/* TABLE */
-.table-wrap{
-    overflow:auto;
-    max-height:400px;
-    background:rgba(0,0,0,0.1);
-    border-radius:8px;
-}
-table{
-    width:100%;
-    min-width:1400px;
-    border-collapse:collapse;
-}
-th,td{
-    padding:8px;
-    text-align:center;
-    font-size:12px;
-    border-bottom:1px solid #ddd;
-}
-thead th{
-    background:#8e44ad;
-    color:white;
-    position:sticky;
-    top:0;
-}
-
-/* PAGE */
-.page{
-    display:none;
-}
-.page.active{
-    display:block;
-}
-</style>
-
+    <!-- CSS -->
+    <link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
 
-<h2>📊 TREKING MY REP</h2>
+<div class="bg"></div>
+<div class="overlay"></div>
 
-<!-- MENU -->
-<div class="menu-tab">
-    <button onclick="showPage('tracking')">📊 Data Tracking</button>
-    <button onclick="showPage('pivot')">📈 Pivot</button>
-</div>
+<div class="page-wrap">
 
-<!-- ================= PAGE TRACKING ================= -->
-<div id="page-tracking" class="page active">
+    <div class="card-main form-card">
 
-    <!-- BUTTON -->
-    <div class="btn-group">
-        <button class="btn-save" onclick="exportExcel()">📤 Download</button>
-        <button class="btn-update" onclick="document.getElementById('uploadExcel').click()">📥 Upload</button>
-        <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
-        <button class="btn-update" onclick="editMassal()">✏ Edit Massal</button>
+        <h2>📊 TREKING MY REP</h2>
 
-        <input type="file" id="uploadExcel" hidden>
+        <!-- MENU ATAS -->
+        <div class="top-menu">
+            <button onclick="showTab('data')">📋 Data Treking</button>
+            <button onclick="showTab('pivot')">📈 Pivot</button>
+        </div>
+
+        <!-- FORM -->
+        <div class="form-vertical">
+
+            <input id="wo" placeholder="WO">
+            <input id="area" placeholder="Area">
+
+            <input id="tahun" placeholder="Tahun">
+            <input id="bulan" placeholder="Bulan">
+
+            <input id="stb" type="number" placeholder="STB" oninput="hitung()">
+
+            <input id="dpp" placeholder="DPP" readonly>
+            <input id="amount" placeholder="AMOUNT" readonly>
+
+            <input id="tgl" type="date">
+            <input id="payment" type="date">
+
+            <select id="remark">
+                <option value="NOT PAID">NOT PAID</option>
+                <option value="PAID">PAID</option>
+            </select>
+
+            <input id="invoice" placeholder="No Invoice">
+            <input id="note" placeholder="Note">
+
+        </div>
+
+        <button class="btn-save" onclick="simpan()">💾 Simpan</button>
+
+        <!-- DATA TABLE -->
+        <div id="dataTab" class="tab-content">
+
+            <div class="table-wrap">
+                <table id="tableData">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>WO</th>
+                            <th>Area</th>
+                            <th>DPP</th>
+                            <th>Amount</th>
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- PIVOT -->
+        <div id="pivotTab" class="tab-content" style="display:none;">
+            <p>📈 Fitur Pivot (Coming Soon)</p>
+        </div>
+
     </div>
 
-    <!-- TABLE -->
-    <div class="table-wrap">
-        <table id="tableData">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th><input type="checkbox" onclick="checkAll(this)"></th>
-                    <th>ID</th>
-                    <th>WO</th>
-                    <th>Area</th>
-                    <th>WO Type</th>
-                    <th>Tahun</th>
-                    <th>Month</th>
-                    <th>STB</th>
-                    <th>DPP</th>
-                    <th>Amount</th>
-                    <th>Tgl</th>
-                    <th>Payment</th>
-                    <th>Remark</th>
-                    <th>Invoice</th>
-                    <th>Note</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-</div>
-
-<!-- ================= PAGE PIVOT ================= -->
-<div id="page-pivot" class="page">
-    <h3>📈 Pivot</h3>
-    <p>Isi pivot nanti di sini</p>
 </div>
 
 <!-- JS -->
