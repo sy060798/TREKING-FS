@@ -7,30 +7,28 @@
 
 <link rel="stylesheet" href="../style.css">
 
-<style>
+<!-- XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-/* =========================
-   MYREP ONLY (AMAN)
-========================= */
+<style>
 
 .myrep-page h2{
     text-align:center;
 }
 
 /* FORM */
-.myrep-page .form-vertical{
+.form-vertical{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
     gap:10px;
 }
 
-.myrep-page input, 
-.myrep-page select{
+input, select{
     padding:8px;
 }
 
 /* BUTTON */
-.myrep-page .btn-save{
+.btn-save{
     margin-top:10px;
     padding:10px;
     background:#3498db;
@@ -39,72 +37,39 @@
     cursor:pointer;
 }
 
-.myrep-page .btn-save:hover{
+.btn-save:hover{
     background:#2980b9;
 }
 
-/* MENU */
-.myrep-page .top-menu{
-    text-align:center;
-    margin-bottom:15px;
-}
-
-.myrep-page .top-menu button{
-    margin:5px;
-    padding:8px 12px;
-}
-
-/* =========================
-   TABLE FIX (ANTI SILANG)
-========================= */
-
-.myrep-page .table-wrap{
-    overflow-x:auto;
-    overflow-y:auto;
+/* TABLE */
+.table-wrap{
+    overflow:auto;
     margin-top:20px;
     max-height:350px;
 }
 
-/* paksa tabel lebar */
-.myrep-page table{
+table{
     width:100%;
     border-collapse:collapse;
-    min-width:1600px; /* penting */
+    min-width:1600px;
 }
 
-/* header */
-.myrep-page thead tr:first-child th{
-    background: linear-gradient(90deg, #8e44ad, #9b59b6);
-    color:white;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-}
-
-/* isi tabel */
-.myrep-page th, 
-.myrep-page td{
+th, td{
     padding:8px;
     text-align:center;
-    border-bottom:1px solid rgba(255,255,255,0.1);
-    white-space: nowrap; /* ini kunci */
+    white-space:nowrap;
     font-size:12px;
 }
 
-/* hover */
-.myrep-page tbody tr:hover{
-    background: rgba(255,255,255,0.08);
+thead th{
+    background: linear-gradient(90deg,#8e44ad,#9b59b6);
+    color:white;
+    position:sticky;
+    top:0;
 }
 
-/* kolom note boleh panjang */
-.myrep-page td:nth-child(16){
-    white-space: normal;
-    max-width:200px;
-}
-
-/* tombol aksi */
-.myrep-page td:last-child{
-    white-space: nowrap;
+tbody tr:hover{
+    background:rgba(255,255,255,0.08);
 }
 
 </style>
@@ -114,11 +79,6 @@
 <body class="myrep-page">
 
 <h2>📊 TREKING MY REP</h2>
-
-<div class="top-menu">
-    <button onclick="showTab('data')">📋 Data</button>
-    <button onclick="showTab('pivot')">📈 Pivot</button>
-</div>
 
 <!-- FORM -->
 <div class="form-vertical">
@@ -149,42 +109,39 @@
 <button onclick="hapusTerpilih()">🗑 Hapus Terpilih</button>
 <button onclick="updateMassal()">⚡ Update Massal</button>
 
+<!-- EXCEL -->
+<div style="margin-top:10px;">
+    <input type="file" id="uploadExcel">
+    <button onclick="importExcel()">📥 Upload Excel</button>
+    <button onclick="exportExcel()">📤 Download Excel</button>
+</div>
+
 <!-- TABLE -->
-<div id="dataTab">
 <div class="table-wrap">
 <table id="tableData">
-
 <thead>
 <tr>
-    <th>No</th>
-    <th>✔</th>
-    <th>ID</th>
-    <th>WO</th>
-    <th>Area</th>
-    <th>WO Type</th>
-    <th>Tahun</th>
-    <th>Month</th>
-    <th>STB</th>
-    <th>DPP</th>
-    <th>Amount</th>
-    <th>Tgl</th>
-    <th>Payment</th>
-    <th>Remark</th>
-    <th>Invoice</th>
-    <th>Note</th>
-    <th>Aksi</th>
+<th>No</th>
+<th>✔</th>
+<th>ID</th>
+<th>WO</th>
+<th>Area</th>
+<th>WO Type</th>
+<th>Tahun</th>
+<th>Month</th>
+<th>STB</th>
+<th>DPP</th>
+<th>Amount</th>
+<th>Tgl</th>
+<th>Payment</th>
+<th>Remark</th>
+<th>Invoice</th>
+<th>Note</th>
+<th>Aksi</th>
 </tr>
 </thead>
-
 <tbody></tbody>
-
 </table>
-</div>
-</div>
-
-<!-- PIVOT -->
-<div id="pivotTab" style="display:none">
-    <p>Pivot coming soon...</p>
 </div>
 
 <script src="../js/myrep.js"></script>
