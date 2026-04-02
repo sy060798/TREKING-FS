@@ -13,24 +13,33 @@
 <style>
 
 /* =========================
-   PAGE
+   WRAPPER (ANTI SILANG)
 ========================= */
-body{
+.myrep-page{
     padding:20px;
 }
 
-h2{
+/* TITLE */
+.myrep-page h2{
     text-align:center;
+    margin-bottom:15px;
 }
 
 /* =========================
    BUTTON
 ========================= */
-.btn{
+.btn-group{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.btn-group button{
     padding:8px 12px;
     border:none;
-    cursor:pointer;
     border-radius:6px;
+    cursor:pointer;
 }
 
 .btn-save{background:#3498db;color:white;}
@@ -38,51 +47,66 @@ h2{
 .btn-update{background:#f39c12;color:white;}
 
 /* =========================
-   TABLE
+   TABLE FIX (ANTI PECAH)
 ========================= */
 .table-wrap{
-    overflow:auto;
-    max-height:350px;
-    margin-top:15px;
+    overflow-x:auto;
+    overflow-y:auto;
+    max-height:400px;
+    background:rgba(0,0,0,0.3);
+    border-radius:10px;
 }
 
-table{
+/* paksa lebar */
+.myrep-page table{
     width:100%;
-    min-width:1400px;
+    min-width:1600px;
     border-collapse:collapse;
 }
 
-th,td{
-    padding:8px;
-    text-align:center;
-    white-space:nowrap;
-    font-size:12px;
-}
-
-thead th{
+/* header */
+.myrep-page thead th{
     background:linear-gradient(90deg,#8e44ad,#9b59b6);
     color:white;
     position:sticky;
     top:0;
+    z-index:2;
 }
 
-tbody tr:hover{
-    background:rgba(0,0,0,0.05);
+/* cell */
+.myrep-page th,
+.myrep-page td{
+    padding:8px;
+    text-align:center;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+/* hover */
+.myrep-page tbody tr:hover{
+    background:rgba(255,255,255,0.08);
+}
+
+/* NOTE biar wrap */
+.myrep-page td:nth-child(16){
+    white-space:normal;
+    max-width:200px;
 }
 
 /* =========================
-   MODAL
+   MODAL FIX (CENTER)
 ========================= */
 #modalEdit{
     display:none;
     position:fixed;
-    width:100%;
-    height:100%;
     top:0;
     left:0;
+    width:100%;
+    height:100%;
     background:rgba(0,0,0,0.6);
     justify-content:center;
     align-items:center;
+    z-index:999;
 }
 
 .modal-box{
@@ -90,8 +114,16 @@ tbody tr:hover{
     padding:20px;
     border-radius:10px;
     width:500px;
+    max-width:95%;
+    animation:fadeIn 0.2s ease;
 }
 
+@keyframes fadeIn{
+    from{opacity:0;transform:scale(0.9);}
+    to{opacity:1;transform:scale(1);}
+}
+
+/* GRID */
 .edit-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -99,28 +131,38 @@ tbody tr:hover{
 }
 
 .full{
-    grid-column: span 2;
+    grid-column:span 2;
 }
 
-input, select{
+/* INPUT */
+#modalEdit input,
+#modalEdit select{
     padding:8px;
     width:100%;
+}
+
+/* BUTTON */
+.modal-btn{
+    margin-top:10px;
+    display:flex;
+    justify-content:space-between;
 }
 
 </style>
 
 </head>
 
-<body>
+<body class="myrep-page">
 
 <h2>📊 TREKING MY REP</h2>
 
 <!-- BUTTON -->
-<div style="margin-bottom:10px;">
-<button class="btn btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
-<input type="file" id="uploadExcel">
-<button class="btn btn-update" onclick="importExcel()">📥 Upload</button>
-<button class="btn btn-save" onclick="exportExcel()">📤 Download</button>
+<div class="btn-group">
+    <button class="btn-save" onclick="exportExcel()">📤 Download</button>
+    <button class="btn-update" onclick="importExcel()">📥 Upload</button>
+    <button class="btn-hapus" onclick="hapusTerpilih()">🗑 Hapus</button>
+
+    <input type="file" id="uploadExcel">
 </div>
 
 <!-- TABLE -->
@@ -155,20 +197,23 @@ input, select{
 <div id="modalEdit">
 <div class="modal-box">
 
-<h3>Edit Data</h3>
+<h3 style="text-align:center;">✏ Edit Data</h3>
 
 <div class="edit-grid">
 <input id="edit_wo" class="full">
 <input id="edit_area">
 <input id="edit_wotype">
+
 <input id="edit_tahun">
 <input id="edit_bulan">
+
 <input id="edit_stb">
 <input id="edit_dpp" readonly>
+
 <input id="edit_amount" readonly>
 <input id="edit_tgl" type="date">
-<input id="edit_payment" type="date">
 
+<input id="edit_payment" type="date">
 <select id="edit_remark">
 <option>NOT PAID</option>
 <option>PAID</option>
@@ -178,10 +223,10 @@ input, select{
 <input id="edit_note" class="full">
 </div>
 
-<br>
-
-<button class="btn btn-save" onclick="saveEdit()">Save</button>
-<button class="btn btn-hapus" onclick="closeModal()">Close</button>
+<div class="modal-btn">
+<button class="btn-save" onclick="saveEdit()">💾 Save</button>
+<button class="btn-hapus" onclick="closeModal()">❌ Close</button>
+</div>
 
 </div>
 </div>
