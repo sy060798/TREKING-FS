@@ -69,3 +69,11 @@ select {
     border-radius: 8px;
     border: none;
 }
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: none;
+}
