@@ -1,6 +1,5 @@
 let dataList = [];
 let currentEditId = null;
-let lastId = 0;
 
 const hargaArea = {
     "purwakarta":280000,
@@ -11,7 +10,9 @@ const hargaArea = {
     "deli serdang":260000
 };
 
-// ================= RENDER =================
+// =======================
+// RENDER
+// =======================
 function renderTable(){
     let tbody = document.querySelector("#tableData tbody");
     tbody.innerHTML = "";
@@ -35,71 +36,129 @@ function renderTable(){
             <td>${d.remark}</td>
             <td>${d.invoice}</td>
             <td>${d.note}</td>
-            <td><button onclick="editData(${d.id})">✏</button></td>
+            <td>
+                <button onclick="editData('${d.id}')">✏</button>
+            </td>
         </tr>
         `;
     });
 }
 
-// ================= CHECK ALL =================
-function checkAll(el){
-    let checkboxes = document.querySelectorAll("tbody input[type=checkbox]");
-    checkboxes.forEach(c=>c.checked = el.checked);
-}
-
-// ================= DELETE =================
-function hapusTerpilih(){
-    let checked = document.querySelectorAll("input[type=checkbox]:checked");
-    let ids = [...checked].map(c=>c.dataset.id);
-
-    dataList = dataList.filter(d=>!ids.includes(String(d.id)));
-    renderTable();
-}
-
-// ================= EDIT =================
+// =======================
+// EDIT SATU
+// =======================
 function editData(id){
-    let d = dataList.find(x=>x.id==id);
-    let newWo = prompt("Edit WO", d.wo);
-    if(newWo===null) return;
+    let d = dataList.find(x=>String(x.id)==String(id));
+    currentEditId = id;
 
-    d.wo = newWo;
-    renderTable();
+    document.getElementById("edit_wo").value = d.wo;
+    document.getElementById("edit_area").value = d.area;
+    document.getElementById("edit_wotype").value = d.wotype;
+    document.getElementById("edit_tahun").value = d.tahun;
+    document.getElementById("edit_bulan").value = d.bulan;
+    document.getElementById("edit_stb").value = d.stb;
+    document.getElementById("edit_dpp").value = d.dpp;
+    document.getElementById("edit_amount").value = d.amount;
+    document.getElementById("edit_tgl").value = d.tgl;
+    document.getElementById("edit_payment").value = d.payment;
+    document.getElementById("edit_invoice").value = d.invoice;
+    document.getElementById("edit_note").value = d.note;
+
+    document.getElementById("modalEdit").style.display = "flex";
 }
 
-// ================= EDIT MASSAL =================
+// =======================
+function closeModal(){
+    document.getElementById("modalEdit").style.display = "none";
+}
+
+// =======================
+// SAVE EDIT (SINGLE + MASSAL)
+// =======================
+function saveEdit(){
+
+    // MASSAL
+    if(Array.isArray(currentEditId)){
+        dataList.forEach(d=>{
+            if(currentEditId.includes(String(d.id))){
+                d.remark = document.getElementById("edit_remark")?.value || d.remark;
+            }
+        });
+
+        renderTable();
+        closeModal();
+        return;
+    }
+
+    // SINGLE
+    let d = dataList.find(x=>String(x.id)==String(currentEditId));
+
+    let area = document.getElementById("edit_area").value.toLowerCase().trim();
+    let stb = parseInt(document.getElementById("edit_stb").value)||0;
+
+    let harga = hargaArea[area]||0;
+    let dpp = harga + (stb*50000);
+    let amount = Math.round(dpp*1.11);
+
+    d.wo = document.getElementById("edit_wo").value;
+    d.area = document.getElementById("edit_area").value;
+    d.wotype = document.getElementById("edit_wotype").value;
+    d.tahun = document.getElementById("edit_tahun").value;
+    d.bulan = document.getElementById("edit_bulan").value;
+    d.stb = stb;
+    d.dpp = dpp;
+    d.amount = amount;
+    d.tgl = document.getElementById("edit_tgl").value;
+    d.payment = document.getElementById("edit_payment").value;
+    d.invoice = document.getElementById("edit_invoice").value;
+    d.note = document.getElementById("edit_note").value;
+
+    renderTable();
+    closeModal();
+}
+
+// =======================
+// EDIT MASSAL
+// =======================
 function editMassal(){
     let checked = document.querySelectorAll("input[type=checkbox]:checked");
+
     if(checked.length===0){
         alert("Pilih data dulu!");
         return;
     }
 
     let ids = [...checked].map(c=>c.dataset.id);
-    let status = prompt("Ubah Remark jadi (PAID / NOT PAID)");
+    currentEditId = ids;
 
-    if(!status) return;
+    document.querySelectorAll("#modalEdit input").forEach(i=>i.value="");
 
-    dataList.forEach(d=>{
-        if(ids.includes(String(d.id))){
-            d.remark = status.toUpperCase();
-        }
-    });
+    document.getElementById("modalEdit").style.display = "flex";
+}
+
+// =======================
+// DELETE
+// =======================
+function hapusTerpilih(){
+    let checked = document.querySelectorAll("input[type=checkbox]:checked");
+
+    let ids = [...checked].map(c=>c.dataset.id);
+
+    dataList = dataList.filter(d=>!ids.includes(String(d.id)));
 
     renderTable();
 }
 
-// ================= IMPORT =================
-document.getElementById("uploadExcel").addEventListener("change", importExcel);
+// =======================
+// IMPORT EXCEL
+// =======================
+function importExcel(){
 
-function importExcel(e){
-    let file = e.target.files[0];
+    let file = document.getElementById("uploadExcel").files[0];
     if(!file){
         alert("Pilih file dulu!");
         return;
     }
-
-    dataList = [];
-    lastId = 0;
 
     let reader = new FileReader();
 
@@ -109,10 +168,11 @@ function importExcel(e){
         let ws = wb.Sheets[wb.SheetNames[0]];
         let json = XLSX.utils.sheet_to_json(ws);
 
-        json.forEach(row=>{
-            lastId++;
+        dataList = [];
 
-            let area = (row.AREA || "").toLowerCase().trim();
+        json.forEach(row=>{
+
+            let area = (row.AREA||"").toLowerCase().trim();
             let stb = parseInt(row.STB)||0;
 
             let harga = hargaArea[area]||0;
@@ -120,7 +180,7 @@ function importExcel(e){
             let amount = Math.round(dpp*1.11);
 
             dataList.push({
-                id:lastId,
+                id: Math.floor(1000000 + Math.random() * 9000000),
                 wo: row.WO||"",
                 area: row.AREA||"",
                 wotype: row["WO TYPE"]||"",
@@ -135,6 +195,7 @@ function importExcel(e){
                 invoice: row["NO INVOICE"]||"",
                 note: row.NOTE||""
             });
+
         });
 
         renderTable();
@@ -143,18 +204,12 @@ function importExcel(e){
     reader.readAsArrayBuffer(file);
 }
 
-// ================= EXPORT =================
+// =======================
+// EXPORT
+// =======================
 function exportExcel(){
     let ws = XLSX.utils.json_to_sheet(dataList);
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "DATA");
     XLSX.writeFile(wb, "data.xlsx");
-}
-
-// ================= MENU =================
-function showPage(page){
-    document.getElementById("page-tracking").style.display = "none";
-    document.getElementById("page-pivot").style.display = "none";
-
-    document.getElementById("page-"+page).style.display = "block";
 }
