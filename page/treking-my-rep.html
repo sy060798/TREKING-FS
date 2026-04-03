@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
-<!-- LIB (JANGAN DEFER DULU BIAR AMAN) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -25,7 +24,7 @@ button{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;}
 .table-wrap{overflow:auto;max-height:500px;background:#222;border-radius:10px;}
 table{width:100%;min-width:1200px;border-collapse:collapse;}
 th,td{padding:6px;font-size:12px;text-align:center;border-bottom:1px solid #444;}
-thead th{background:#8e44ad;color:white;position:sticky;top:0;}
+thead th{background:#8e44ad;position:sticky;top:0;}
 
 .tab{display:none;}
 .active{display:block;}
@@ -45,16 +44,7 @@ padding:20px;
 border-radius:10px;
 width:320px;
 }
-.box input{
-width:100%;
-padding:6px;
-margin-bottom:10px;
-background:#111;
-color:white;
-border:1px solid #555;
-}
 
-/* sembunyikan upload */
 #upload{display:none;}
 </style>
 </head>
@@ -70,12 +60,15 @@ border:1px solid #555;
 
 <div class="btn-group">
 <button class="blue" onclick="exportExcel()">⬇ Download</button>
-<button class="orange" onclick="document.getElementById('upload').click()">⬆ Upload</button>
+
+<!-- FIX UPLOAD -->
+<button class="orange" onclick="triggerUpload()">⬆ Upload</button>
+
 <button class="orange" onclick="cekUpdate()">🔄 Update</button>
 <button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
 <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
 
-<input type="file" id="upload">
+<input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
 <div id="data" class="tab active">
@@ -118,8 +111,8 @@ border:1px solid #555;
 </div>
 </div>
 
-<!-- JS TARUH PALING BAWAH (INI KUNCI BIAR GAK RUSAK) -->
-<script src="myrep.js"></script>
+<!-- FIX PATH -->
+<script src="../js/myrep.js"></script>
 
 </body>
 </html>
