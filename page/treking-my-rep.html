@@ -5,36 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
-<!-- XLSX -->
+<!-- LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{font-family:Arial;padding:20px;background:#f5f5f5;}
+body{
+    font-family:Arial;
+    background:#111;
+    color:#fff;
+    padding:20px;
+}
 
-h2{text-align:center;margin-bottom:10px;}
+h2{
+    text-align:center;
+}
 
+/* MENU */
 .menu{
     display:flex;
     gap:10px;
-    margin-bottom:10px;
+    margin-bottom:15px;
 }
 .menu button{
     background:#8e44ad;
     color:white;
     border:none;
-    padding:6px 12px;
+    padding:8px 14px;
     border-radius:6px;
     cursor:pointer;
 }
 
+/* BUTTON */
 .btn-group{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
-    margin-bottom:10px;
+    margin-bottom:15px;
 }
 button{
     padding:8px 12px;
@@ -46,22 +53,23 @@ button{
 .red{background:#e74c3c;color:white;}
 .orange{background:#f39c12;color:white;}
 
+/* TABLE */
 .table-wrap{
     overflow:auto;
-    max-height:450px;
-    background:white;
+    max-height:500px;
+    background:#222;
     border-radius:10px;
 }
 table{
     width:100%;
-    min-width:1300px;
+    min-width:1200px;
     border-collapse:collapse;
 }
 th,td{
     padding:6px;
-    text-align:center;
     font-size:12px;
-    border-bottom:1px solid #ddd;
+    text-align:center;
+    border-bottom:1px solid #444;
 }
 thead th{
     background:#8e44ad;
@@ -70,28 +78,35 @@ thead th{
     top:0;
 }
 
+/* TAB */
 .tab{display:none;}
 .active{display:block;}
 
+/* MODAL */
 #modalEdit{
     display:none;
     position:fixed;
-    top:0;left:0;
-    width:100%;height:100%;
-    background:rgba(0,0,0,0.5);
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
     justify-content:center;
     align-items:center;
 }
 .box{
-    background:white;
+    background:#222;
     padding:20px;
     border-radius:10px;
-    width:350px;
+    width:320px;
 }
 .box input{
     width:100%;
     padding:6px;
-    margin-bottom:8px;
+    margin-bottom:10px;
+    background:#111;
+    color:white;
+    border:1px solid #555;
 }
 </style>
 </head>
@@ -114,58 +129,73 @@ thead th{
     <button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
     <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
 
-    <input type="file" id="upload" hidden onchange="importExcel()">
+    <input type="file" id="upload" hidden>
 </div>
 
 <!-- DATA -->
 <div id="data" class="tab active">
-<div class="table-wrap">
-<table id="tableData">
-<thead>
-<tr>
-<th>No</th>
-<th><input type="checkbox" onclick="checkAll(this)"></th>
-<th>ID</th>
-<th>WO</th>
-<th>Area</th>
-<th>WO Type</th>
-<th>STB</th>
-<th>DPP</th>
-<th>Amount</th>
-<th>Remark</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
+    <div class="table-wrap">
+        <table id="tableData">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th><input type="checkbox" id="checkAll"></th>
+                    <th>ID</th>
+                    <th>WO</th>
+                    <th>Area</th>
+                    <th>WO Type</th>
+                    <th>STB</th>
+                    <th>DPP</th>
+                    <th>Amount</th>
+                    <th>Remark</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
 
 <!-- PIVOT -->
 <div id="pivot" class="tab">
-<h3>📈 Pivot Grafik</h3>
-<canvas id="chartPivot"></canvas>
+    <h3>📈 Pivot Grafik</h3>
+    <canvas id="chartPivot"></canvas>
 </div>
 
 <!-- MODAL -->
 <div id="modalEdit">
-<div class="box">
+    <div class="box">
+        <h3>Edit Data</h3>
 
-<h3>Edit Data</h3>
+        <input id="edit_wo" placeholder="WO">
+        <input id="edit_area" placeholder="Area">
+        <input id="edit_stb" placeholder="STB">
+        <input id="edit_remark" placeholder="Remark">
 
-<input id="edit_wo" placeholder="WO">
-<input id="edit_area" placeholder="Area">
-<input id="edit_stb" placeholder="STB">
-<input id="edit_remark" placeholder="Remark">
-
-<button class="blue" onclick="saveEdit()">💾 Save</button>
-<button class="red" onclick="closeModal()">❌ Close</button>
-
-</div>
+        <button class="blue" id="btnSave">💾 Save</button>
+        <button class="red" id="btnClose">❌ Close</button>
+    </div>
 </div>
 
-<!-- JS -->
-<script src="../js/myrep.js"></script>
+<!-- JS (PASTIKAN FILE ADA DI FOLDER SAMA) -->
+<script src="myrep.js"></script>
+
+<script>
+// 🔥 FIX EVENT AGAR TIDAK SILANG
+document.addEventListener("DOMContentLoaded", function(){
+
+    document.getElementById("upload").addEventListener("change", importExcel);
+
+    document.getElementById("checkAll").addEventListener("change", function(){
+        document.querySelectorAll("tbody input[type=checkbox]")
+            .forEach(c => c.checked = this.checked);
+    });
+
+    document.getElementById("btnSave").addEventListener("click", saveEdit);
+    document.getElementById("btnClose").addEventListener("click", closeModal);
+
+});
+</script>
 
 </body>
 </html>
