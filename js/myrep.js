@@ -1,15 +1,15 @@
 let dataList = [];
 let currentEditId = null;
-
-const hargaArea = {
-    "jakarta":300000,
-    "surabaya":280000
-};
+let chart;
 
 // ================= TAB =================
 function showTab(tab){
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
     document.getElementById(tab).classList.add("active");
+
+    if(tab==="pivot"){
+        generatePivot();
+    }
 }
 
 // ================= CHECK ALL =================
@@ -42,33 +42,38 @@ function renderTable(){
     });
 }
 
-// ================= IMPORT =================
+// ================= IMPORT (ALL SHEET + FIX ID) =================
 function importExcel(){
     let file = document.getElementById("upload").files[0];
     let reader = new FileReader();
 
     reader.onload = e=>{
         let wb = XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-        let ws = wb.Sheets[wb.SheetNames[0]];
-        let json = XLSX.utils.sheet_to_json(ws);
+        dataList = [];
 
-        dataList = json.map(r=>{
-            let area = (r.AREA||"").toLowerCase();
-            let stb = parseInt(r.STB)||0;
-            let harga = hargaArea[area]||200000;
+        wb.SheetNames.forEach(sheet=>{
+            let ws = wb.Sheets[sheet];
+            let json = XLSX.utils.sheet_to_json(ws);
 
-            let dpp = harga + stb*50000;
-            let amount = Math.round(dpp*1.11);
+            json.forEach(r=>{
+                let area = (r.AREA||"").toLowerCase().trim();
+                let stb = parseInt(r.STB)||0;
+                let harga = 200000;
 
-            return {
-                id: Date.now()+Math.random(),
-                wo: r.WO,
-                area: r.AREA,
-                stb: stb,
-                dpp: dpp,
-                amount: amount,
-                remark: r.REMARK || "NOT PAID"
-            };
+                let dpp = harga + stb*50000;
+                let amount = Math.round(dpp*1.11);
+
+                dataList.push({
+                    id: r.ID || r.Id || r.id || Math.floor(1000000 + Math.random()*9000000),
+                    wo: r.WO || "",
+                    area: r.AREA || "",
+                    wotype: r["WO TYPE"] || "",
+                    stb: stb,
+                    dpp: dpp,
+                    amount: amount,
+                    remark: r.REMARK || "NOT PAID"
+                });
+            });
         });
 
         renderTable();
@@ -85,9 +90,9 @@ function exportExcel(){
     XLSX.writeFile(wb, "data.xlsx");
 }
 
-// ================= EDIT SINGLE =================
+// ================= EDIT =================
 function editData(id){
-    let d = dataList.find(x=>x.id==id);
+    let d = dataList.find(x=>String(x.id)==String(id));
     currentEditId = id;
 
     edit_wo.value = d.wo;
@@ -114,25 +119,21 @@ function editMassal(){
 // ================= SAVE =================
 function saveEdit(){
 
-    // MASSAL
     if(Array.isArray(currentEditId)){
         dataList.forEach(d=>{
             if(currentEditId.includes(String(d.id))){
                 d.remark = edit_remark.value || d.remark;
             }
         });
-    }
-    else{
-        let d = dataList.find(x=>x.id==currentEditId);
+    }else{
+        let d = dataList.find(x=>String(x.id)==String(currentEditId));
 
-        let area = edit_area.value.toLowerCase();
         let stb = parseInt(edit_stb.value)||0;
-        let harga = hargaArea[area]||200000;
 
         d.wo = edit_wo.value;
         d.area = edit_area.value;
         d.stb = stb;
-        d.dpp = harga + stb*50000;
+        d.dpp = 200000 + stb*50000;
         d.amount = Math.round(d.dpp*1.11);
         d.remark = edit_remark.value;
     }
@@ -161,8 +162,31 @@ function closeModal(){
 }
 
 // ================= PIVOT =================
-function showPivot(){
-    let total = dataList.reduce((a,b)=>a+b.amount,0);
-    document.getElementById("pivotResult").innerHTML =
-        "Total Amount: "+total;
+function generatePivot(){
+
+    let group = {};
+
+    dataList.forEach(d=>{
+        let key = d.area || "UNKNOWN";
+        if(!group[key]) group[key]=0;
+        group[key]+= d.amount;
+    });
+
+    let labels = Object.keys(group);
+    let values = Object.values(group);
+
+    let ctx = document.getElementById("chartPivot");
+
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Amount',
+                data: values
+            }]
+        }
+    });
 }
