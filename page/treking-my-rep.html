@@ -8,27 +8,19 @@
 <!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body{
-    font-family:Arial;
-    padding:20px;
-    background:#f5f5f5;
-}
+body{font-family:Arial;padding:20px;background:#f5f5f5;}
 
-/* HEADER */
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
+h2{text-align:center;margin-bottom:10px;}
 
-/* MENU */
 .menu{
     display:flex;
     gap:10px;
-    margin:10px 0;
+    margin-bottom:10px;
 }
-
 .menu button{
     background:#8e44ad;
     color:white;
@@ -38,46 +30,39 @@ body{
     cursor:pointer;
 }
 
-/* BUTTON */
 .btn-group{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
     margin-bottom:10px;
 }
-
 button{
     padding:8px 12px;
     border:none;
     border-radius:6px;
     cursor:pointer;
 }
-
 .blue{background:#3498db;color:white;}
 .red{background:#e74c3c;color:white;}
 .orange{background:#f39c12;color:white;}
 
-/* TABLE */
 .table-wrap{
     overflow:auto;
     max-height:450px;
     background:white;
     border-radius:10px;
 }
-
 table{
     width:100%;
-    min-width:1200px;
+    min-width:1300px;
     border-collapse:collapse;
 }
-
 th,td{
     padding:6px;
     text-align:center;
     font-size:12px;
     border-bottom:1px solid #ddd;
 }
-
 thead th{
     background:#8e44ad;
     color:white;
@@ -85,30 +70,24 @@ thead th{
     top:0;
 }
 
-/* TAB */
 .tab{display:none;}
 .active{display:block;}
 
-/* MODAL */
 #modalEdit{
     display:none;
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
+    top:0;left:0;
+    width:100%;height:100%;
     background:rgba(0,0,0,0.5);
     justify-content:center;
     align-items:center;
 }
-
 .box{
     background:white;
     padding:20px;
     border-radius:10px;
     width:350px;
 }
-
 .box input{
     width:100%;
     padding:6px;
@@ -119,9 +98,7 @@ thead th{
 
 <body>
 
-<div class="header">
-    <h2>📊 TREKING MY REP</h2>
-</div>
+<h2>📊 TREKING MY REP</h2>
 
 <!-- MENU -->
 <div class="menu">
@@ -140,7 +117,7 @@ thead th{
     <input type="file" id="upload" hidden onchange="importExcel()">
 </div>
 
-<!-- DATA TAB -->
+<!-- DATA -->
 <div id="data" class="tab active">
 <div class="table-wrap">
 <table id="tableData">
@@ -164,13 +141,13 @@ thead th{
 </div>
 </div>
 
-<!-- PIVOT TAB -->
+<!-- PIVOT -->
 <div id="pivot" class="tab">
-<h3>📈 Pivot</h3>
-<div id="pivotResult">Belum ada data</div>
+<h3>📈 Pivot Grafik</h3>
+<canvas id="chartPivot"></canvas>
 </div>
 
-<!-- MODAL EDIT -->
+<!-- MODAL -->
 <div id="modalEdit">
 <div class="box">
 
@@ -187,7 +164,7 @@ thead th{
 </div>
 </div>
 
-<!-- JS (PENTING: path benar) -->
+<!-- JS -->
 <script src="../js/myrep.js"></script>
 
 </body>
