@@ -4,7 +4,7 @@ let currentEditId = null;
 let chart = null;
 const SERVER_URL = "https://unalcoholised-discographically-gabriella.ngrok-free.dev";
 
-// ================= INIT =================
+// ================= INIT ==================
 document.addEventListener("DOMContentLoaded", function(){
 
   window.edit_wo = document.getElementById("edit_wo");
