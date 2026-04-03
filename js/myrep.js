@@ -254,7 +254,7 @@ function closeModal(){
 let dataList = [];
 let currentEditId = null;
 let chart = null;
-const SERVER_URL = "https://xxxx-xx-xx-xx-xx.ngrok-free.dev"; // ganti ini sesuai ngrok
+const SERVER_URL = "https://unalcoholised-discographically-gabriella.ngrok-free.dev"; // ganti ini sesuai ngrok
 
 // ================= AUTO LOAD DATA =================
 window.addEventListener("load", function(){
