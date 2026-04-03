@@ -6,310 +6,262 @@ let chart = null;
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", function(){
 
-// pastikan semua element ada
-window.edit_wo = document.getElementById("edit_wo");
-window.edit_area = document.getElementById("edit_area");
-window.edit_stb = document.getElementById("edit_stb");
-window.edit_remark = document.getElementById("edit_remark");
-window.modalEdit = document.getElementById("modalEdit");
+  // pastikan semua element ada
+  window.edit_wo = document.getElementById("edit_wo");
+  window.edit_area = document.getElementById("edit_area");
+  window.edit_stb = document.getElementById("edit_stb");
+  window.edit_remark = document.getElementById("edit_remark");
+  window.modalEdit = document.getElementById("modalEdit");
 
-// upload
-let upload = document.getElementById("upload");
-if(upload){
-upload.addEventListener("change", importExcel);
-}
+  // upload
+  let upload = document.getElementById("upload");
+  if(upload){
+    // reset value biar bisa upload berkali-kali
+    upload.addEventListener("click", ()=>upload.value = null);
+    upload.addEventListener("change", importExcel);
+  }
 
-// check all
-let checkAll = document.getElementById("checkAll");
-if(checkAll){
-checkAll.addEventListener("change", function(e){
-document.querySelectorAll("#tableData tbody input[type=checkbox]")
-.forEach(c => c.checked = e.target.checked);
-});
-}
+  // check all
+  let checkAll = document.getElementById("checkAll");
+  if(checkAll){
+    checkAll.addEventListener("change", function(e){
+      document.querySelectorAll("#tableData tbody input[type=checkbox]")
+      .forEach(c => c.checked = e.target.checked);
+    });
+  }
 
 });
 
 // ================= TAB =================
 function showTab(tab){
-document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-document.getElementById(tab).classList.add("active");
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(tab).classList.add("active");
 
-if(tab === "pivot"){
-generatePivot();
-}
+  if(tab === "pivot"){
+    generatePivot();
+  }
 }
 
 // ================= UPLOAD =================
 function triggerUpload(){
-let input = document.getElementById("upload");
-if(input) input.click();
+  let input = document.getElementById("upload");
+  if(input) input.click();
 }
 
 // ================= IMPORT =================
 function importExcel(e){
+  let file = e.target.files[0];
+  if(!file){
+    alert("File tidak ada");
+    return;
+  }
 
-let file = e.target.files[0];
-if(!file){
-alert("File tidak ada");
-return;
-}
+  let reader = new FileReader();
 
-let reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      let wb = XLSX.read(evt.target.result, {type:'binary'});
+      dataList = [];
 
-reader.onload = function(evt){
-try{
+      wb.SheetNames.forEach(s => {
+        let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
+        json.forEach(r => {
+          let stb = parseInt(r.STB) || 0;
+          let dpp = 200000 + stb * 50000;
 
-let wb = XLSX.read(evt.target.result, {type:'binary'});
+          dataList.push({
+            id: r.ID || Date.now()+Math.random(),
+            wo: r.WO || "",
+            area: r.AREA || "",
+            wotype: r["WO TYPE"] || "",
+            stb: stb,
+            dpp: dpp,
+            amount: Math.round(dpp * 1.11),
+            remark: r.REMARK || "NOT PAID",
+            server: "-"
+          });
+        });
+      });
 
-dataList = [];
+      renderTable();
 
-wb.SheetNames.forEach(s => {
+    }catch(err){
+      console.error(err);
+      alert("Gagal baca file");
+    }
+  };
 
-let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
-
-json.forEach(r => {
-
-let stb = parseInt(r.STB) || 0;
-let dpp = 200000 + stb * 50000;
-
-dataList.push({
-id: r.ID || Date.now()+Math.random(),
-wo: r.WO || "",
-area: r.AREA || "",
-wotype: r["WO TYPE"] || "",
-stb: stb,
-dpp: dpp,
-amount: Math.round(dpp * 1.11),
-remark: r.REMARK || "NOT PAID",
-server: "-"
-});
-
-});
-
-});
-
-renderTable();
-
-}catch(err){
-console.error(err);
-alert("Gagal baca file");
-}
-};
-
-reader.readAsBinaryString(file);
+  reader.readAsBinaryString(file);
 }
 
 // ================= RENDER =================
 function renderTable(){
+  let tbody = document.querySelector("#tableData tbody");
+  if(!tbody) return;
 
-let tbody = document.querySelector("#tableData tbody");
-if(!tbody) return;
+  tbody.innerHTML = "";
 
-// 🔥 FIX: jangan pakai +=
-tbody.innerHTML = "";
+  if(dataList.length === 0){
+    tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
+    return;
+  }
 
-if(dataList.length === 0){
-tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
-return;
-}
-
-dataList.forEach((d,i)=>{
-
-let tr = document.createElement("tr");
-
-tr.innerHTML = `
-<td>${i+1}</td>
-<td><input type="checkbox" data-id="${d.id}"></td>
-<td>${d.id}</td>
-<td>${d.wo}</td>
-<td>${d.area}</td>
-<td>${d.wotype}</td>
-<td>${d.stb}</td>
-<td>${d.dpp}</td>
-<td>${d.amount}</td>
-<td>${d.remark}</td>
-<td>${d.server || "-"}</td>
-<td><button onclick="editData('${d.id}')">✏</button></td>
-`;
-
-tbody.appendChild(tr);
-
-});
-
+  dataList.forEach((d,i)=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><input type="checkbox" data-id="${d.id}"></td>
+      <td>${d.id}</td>
+      <td>${d.wo}</td>
+      <td>${d.area}</td>
+      <td>${d.wotype}</td>
+      <td>${d.stb}</td>
+      <td>${d.dpp}</td>
+      <td>${d.amount}</td>
+      <td>${d.remark}</td>
+      <td>${d.server || "-"}</td>
+      <td><button onclick="editData('${d.id}')">✏</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ================= EDIT =================
 function editData(id){
+  currentEditId = id;
+  let d = dataList.find(x => String(x.id) === String(id));
+  if(!d) return;
 
-currentEditId = id;
-
-let d = dataList.find(x => String(x.id) === String(id));
-if(!d) return;
-
-edit_wo.value = d.wo;
-edit_area.value = d.area;
-edit_stb.value = d.stb;
-edit_remark.value = d.remark;
-
-modalEdit.style.display = "flex";
+  edit_wo.value = d.wo;
+  edit_area.value = d.area;
+  edit_stb.value = d.stb;
+  edit_remark.value = d.remark;
+  modalEdit.style.display = "flex";
 }
 
 // ================= EDIT MASSAL =================
 function editMassal(){
-
-let checked = [...document.querySelectorAll("#tableData tbody input:checked")];
-
-if(checked.length === 0){
-alert("Pilih data dulu");
-return;
-}
-
-currentEditId = checked.map(c => String(c.dataset.id));
-
-modalEdit.style.display = "flex";
+  let checked = [...document.querySelectorAll("#tableData tbody input:checked")];
+  if(checked.length === 0){
+    alert("Pilih data dulu");
+    return;
+  }
+  currentEditId = checked.map(c => String(c.dataset.id));
+  modalEdit.style.display = "flex";
 }
 
 // ================= SAVE =================
 function saveEdit(){
-
-if(Array.isArray(currentEditId)){
-
-dataList.forEach(d => {
-if(currentEditId.includes(String(d.id))){
-d.remark = edit_remark.value || d.remark;
-}
-});
-
-}else{
-
-let d = dataList.find(x => String(x.id) === String(currentEditId));
-if(!d) return;
-
-d.wo = edit_wo.value;
-d.area = edit_area.value;
-d.stb = parseInt(edit_stb.value) || 0;
-d.dpp = 200000 + d.stb * 50000;
-d.amount = Math.round(d.dpp * 1.11);
-d.remark = edit_remark.value;
-
-}
-
-renderTable();
-closeModal();
+  if(Array.isArray(currentEditId)){
+    dataList.forEach(d => {
+      if(currentEditId.includes(String(d.id))){
+        d.remark = edit_remark.value || d.remark;
+      }
+    });
+  }else{
+    let d = dataList.find(x => String(x.id) === String(currentEditId));
+    if(!d) return;
+    d.wo = edit_wo.value;
+    d.area = edit_area.value;
+    d.stb = parseInt(edit_stb.value) || 0;
+    d.dpp = 200000 + d.stb * 50000;
+    d.amount = Math.round(d.dpp * 1.11);
+    d.remark = edit_remark.value;
+  }
+  renderTable();
+  closeModal();
 }
 
 // ================= HAPUS =================
 function hapusTerpilih(){
-
-let ids = [...document.querySelectorAll("#tableData tbody input:checked")]
-.map(c => String(c.dataset.id));
-
-dataList = dataList.filter(d => !ids.includes(String(d.id)));
-
-renderTable();
+  let ids = [...document.querySelectorAll("#tableData tbody input:checked")]
+    .map(c => String(c.dataset.id));
+  dataList = dataList.filter(d => !ids.includes(String(d.id)));
+  renderTable();
 }
 
 // ================= EXPORT =================
 function exportExcel(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
 
-if(dataList.length === 0){
-alert("Data kosong");
-return;
-}
-
-let ws = XLSX.utils.json_to_sheet(dataList);
-let wb = XLSX.utils.book_new();
-
-XLSX.utils.book_append_sheet(wb, ws, "DATA");
-XLSX.writeFile(wb, "data.xlsx");
+  let ws = XLSX.utils.json_to_sheet(dataList);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "DATA");
+  XLSX.writeFile(wb, "data.xlsx");
 }
 
 // ================= SERVER =================
 function kirimKeServer(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
 
-if(dataList.length === 0){
-alert("Data kosong");
-return;
-}
-
-fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/save",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body: JSON.stringify(dataList)
-})
-.then(res => res.json())
-.then(res => {
-
-dataList.forEach(d => d.server = "✔ terkirim");
-renderTable();
-
-alert("Berhasil kirim");
-
-})
-.catch(err=>{
-console.error(err);
-alert("Gagal kirim");
-});
-
+  fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/save",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(dataList)
+  })
+  .then(res => res.json())
+  .then(res => {
+    dataList.forEach(d => d.server = "✔ terkirim");
+    renderTable();
+    alert("Berhasil kirim ke server");
+  })
+  .catch(err=>{
+    console.error(err);
+    alert("Gagal kirim");
+  });
 }
 
 // ================= PIVOT =================
 function generatePivot(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
 
-if(dataList.length === 0){
-alert("Data kosong");
-return;
-}
+  let group = {};
+  dataList.forEach(d => {
+    let key = d.area || "UNKNOWN";
+    group[key] = (group[key] || 0) + d.amount;
+  });
 
-let group = {};
+  if(chart) chart.destroy();
 
-dataList.forEach(d => {
-let key = d.area || "UNKNOWN";
-group[key] = (group[key] || 0) + d.amount;
-});
-
-if(chart) chart.destroy();
-
-chart = new Chart(document.getElementById("chartPivot"),{
-type:'bar',
-data:{
-labels:Object.keys(group),
-datasets:[{label:"Total",data:Object.values(group)}]
-}
-});
+  chart = new Chart(document.getElementById("chartPivot"),{
+    type:'bar',
+    data:{
+      labels:Object.keys(group),
+      datasets:[{label:"Total",data:Object.values(group)}]
+    }
+  });
 }
 
 // ================= LAIN =================
 function cekUpdate(){
-alert("OK");
+  alert("OK");
 }
 
 function closeModal(){
-modalEdit.style.display = "none";
+  modalEdit.style.display = "none";
 }
 
-// ================= aouto load data  =================
+// ================= AUTO LOAD DATA =================
 window.addEventListener("load", function(){
-
-fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/get")
-.then(res => res.json())
-.then(res => {
-
-if(res && res.length > 0){
-
-dataList = res;
-
-// tandai dari server
-dataList.forEach(d => d.server = "✔ dari server");
-
-renderTable();
-
-}
-
-})
-.catch(err => {
-console.log("server belum aktif / kosong");
-});
-
+  fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/get")
+  .then(res => res.json())
+  .then(res => {
+    if(res && res.length > 0){
+      dataList = res;
+      dataList.forEach(d => d.server = "✔ dari server");
+      renderTable();
+    }
+  })
+  .catch(err => {
+    console.log("Server belum aktif / kosong");
+  });
 });
