@@ -5,33 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
+<!-- LIB -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{font-family:Arial;background:#111;color:#fff;padding:20px;}
+body{
+font-family:Arial;
+background:#111;
+color:#fff;
+padding:20px;
+}
+
 h2{text-align:center;}
 
-.menu{display:flex;gap:10px;margin-bottom:15px;}
-.menu button{background:#8e44ad;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;}
+.menu{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
 
-.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
+.menu button{
+background:#8e44ad;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+}
 
-button{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;}
+.btn-group{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:15px;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
 .blue{background:#3498db;color:white;}
 .red{background:#e74c3c;color:white;}
 .orange{background:#f39c12;color:white;}
 
-.table-wrap{overflow:auto;max-height:500px;background:#222;border-radius:10px;}
+.table-wrap{
+overflow:auto;
+max-height:500px;
+background:#222;
+border-radius:10px;
+}
 
-table{width:100%;min-width:1200px;border-collapse:collapse;}
-th,td{padding:6px;font-size:12px;text-align:center;border-bottom:1px solid #444;}
-thead th{background:#8e44ad;position:sticky;top:0;}
+table{
+width:100%;
+min-width:1200px;
+border-collapse:collapse;
+}
+
+th,td{
+padding:6px;
+font-size:12px;
+text-align:center;
+border-bottom:1px solid #444;
+}
+
+thead th{
+background:#8e44ad;
+position:sticky;
+top:0;
+}
 
 .tab{display:none;}
 .active{display:block;}
 
-/* 🔥 FIX MODAL (INI PENYEBAB UTAMA) */
 #modalEdit{
 display:none;
 position:fixed;
@@ -42,11 +91,23 @@ height:100%;
 background:rgba(0,0,0,0.7);
 justify-content:center;
 align-items:center;
-z-index:9999; /* penting */
 }
 
-.box{background:#222;padding:20px;border-radius:10px;width:320px;}
-.box input{width:100%;padding:6px;margin-bottom:10px;background:#111;color:white;border:1px solid #555;}
+.box{
+background:#222;
+padding:20px;
+border-radius:10px;
+width:320px;
+}
+
+.box input{
+width:100%;
+padding:6px;
+margin-bottom:10px;
+background:#111;
+color:white;
+border:1px solid #555;
+}
 
 #upload{display:none;}
 </style>
@@ -68,12 +129,13 @@ z-index:9999; /* penting */
 <button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
 <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
 
-<!-- 🚀 SERVER -->
+<!-- 🚀 TAMBAHAN SERVER -->
 <button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
 
 <input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
+<!-- TAB DATA -->
 <div id="data" class="tab active">
 <div class="table-wrap">
 <table id="tableData">
@@ -89,7 +151,8 @@ z-index:9999; /* penting */
 <th>DPP</th>
 <th>Amount</th>
 <th>Remark</th>
-<th>Aksi</th> <!-- FIX: hapus kolom server (tidak dipakai) -->
+<th>Server</th> <!-- TAMBAHAN -->
+<th>Aksi</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -97,11 +160,13 @@ z-index:9999; /* penting */
 </div>
 </div>
 
+<!-- TAB PIVOT -->
 <div id="pivot" class="tab">
 <h3>📈 Pivot Grafik</h3>
 <canvas id="chartPivot"></canvas>
 </div>
 
+<!-- MODAL -->
 <div id="modalEdit">
 <div class="box">
 <h3>Edit Data</h3>
@@ -114,6 +179,7 @@ z-index:9999; /* penting */
 </div>
 </div>
 
+<!-- ⚠️ FIX PENTING PATH -->
 <script src="js/myrep.js"></script>
 
 </body>
