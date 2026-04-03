@@ -288,3 +288,28 @@ alert("OK");
 function closeModal(){
 modalEdit.style.display = "none";
 }
+
+// ================= aouto load data  =================
+window.addEventListener("load", function(){
+
+fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/get")
+.then(res => res.json())
+.then(res => {
+
+if(res && res.length > 0){
+
+dataList = res;
+
+// tandai dari server
+dataList.forEach(d => d.server = "✔ dari server");
+
+renderTable();
+
+}
+
+})
+.catch(err => {
+console.log("server belum aktif / kosong");
+});
+
+});
