@@ -1,22 +1,24 @@
+// ================= GLOBAL =================
+let dataList = [];
+let currentEditId = null;
+let chart = null;
+const SERVER_URL = "https://unalcoholised-discographically-gabriella.ngrok-free.dev";
+
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", function(){
 
-  // pastikan semua element ada
   window.edit_wo = document.getElementById("edit_wo");
   window.edit_area = document.getElementById("edit_area");
   window.edit_stb = document.getElementById("edit_stb");
   window.edit_remark = document.getElementById("edit_remark");
   window.modalEdit = document.getElementById("modalEdit");
 
-  // upload
   let upload = document.getElementById("upload");
   if(upload){
-    // reset value biar bisa upload berkali-kali
     upload.addEventListener("click", ()=>upload.value = null);
     upload.addEventListener("change", importExcel);
   }
 
-  // check all
   let checkAll = document.getElementById("checkAll");
   if(checkAll){
     checkAll.addEventListener("change", function(e){
@@ -195,7 +197,7 @@ function kirimKeServer(){
     return;
   }
 
-  fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/save",{
+  fetch(`${SERVER_URL}/api/save`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify(dataList)
@@ -208,9 +210,25 @@ function kirimKeServer(){
   })
   .catch(err=>{
     console.error(err);
-    alert("Gagal kirim");
+    alert("Gagal kirim ke server");
   });
 }
+
+// ================= AUTO LOAD =================
+window.addEventListener("load", function(){
+  fetch(`${SERVER_URL}/api/get`)
+  .then(res => res.json())
+  .then(res => {
+    if(res && res.length > 0){
+      dataList = res;
+      dataList.forEach(d => d.server = "✔ dari server");
+      renderTable();
+    }
+  })
+  .catch(err => {
+    console.log("Server belum aktif / kosong");
+  });
+});
 
 // ================= PIVOT =================
 function generatePivot(){
@@ -244,49 +262,3 @@ function cekUpdate(){
 function closeModal(){
   modalEdit.style.display = "none";
 }
-
-// ================= GLOBAL =================
-let dataList = [];
-let currentEditId = null;
-let chart = null;
-const SERVER_URL = "https://unalcoholised-discographically-gabriella.ngrok-free.dev"; // ganti ini sesuai ngrok
-
-// ================= AUTO LOAD DATA =================
-window.addEventListener("load", function(){
-  fetch(`${SERVER_URL}/api/get`)
-  .then(res => res.json())
-  .then(res => {
-    if(res && res.length > 0){
-      dataList = res;
-      dataList.forEach(d => d.server = "✔ dari server");
-      renderTable();
-    }
-  })
-  .catch(err => {
-    console.log("Server belum aktif / kosong");
-  });
-});
-
-// ================= KIRIM KE SERVER =================
-function kirimKeServer(){
-  if(dataList.length === 0){
-    alert("Data kosong");
-    return;
-  }
-
-  fetch(`${SERVER_URL}/api/save`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(dataList)
-  })
-  .then(res => res.json())
-  .then(res => {
-    dataList.forEach(d => d.server = "✔ terkirim");
-    renderTable();
-    alert("Berhasil kirim ke server");
-  })
-  .catch(err=>{
-    console.error(err);
-    alert("Gagal kirim ke server");
-  });
-});
