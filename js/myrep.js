@@ -1,170 +1,102 @@
-let dataList=[],currentEditId=null,chart;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treking My Rep</title>
 
-// INIT
-document.addEventListener("DOMContentLoaded", ()=>{
-document.getElementById("upload").addEventListener("change", importExcel);
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-document.getElementById("checkAll").addEventListener("change", e=>{
-document.querySelectorAll("#tableData tbody input[type=checkbox]")
-.forEach(c=>c.checked=e.target.checked);
-});
-});
+<style>
+body{font-family:Arial;background:#111;color:#fff;padding:20px;}
+h2{text-align:center;}
 
-// TAB
-function showTab(tab){
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-document.getElementById(tab).classList.add("active");
-if(tab==="pivot") generatePivot();
+.menu{display:flex;gap:10px;margin-bottom:15px;}
+.menu button{background:#8e44ad;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;}
+
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
+button{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;}
+.blue{background:#3498db;color:white;}
+.red{background:#e74c3c;color:white;}
+.orange{background:#f39c12;color:white;}
+
+.table-wrap{overflow:auto;max-height:500px;background:#222;border-radius:10px;}
+table{width:100%;min-width:1200px;border-collapse:collapse;}
+th,td{padding:6px;font-size:12px;text-align:center;border-bottom:1px solid #444;}
+thead th{background:#8e44ad;color:white;position:sticky;top:0;}
+
+.tab{display:none;}
+.active{display:block;}
+
+#modalEdit{
+display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.7);justify-content:center;align-items:center;
 }
+.box{background:#222;padding:20px;border-radius:10px;width:320px;}
+.box input{width:100%;padding:6px;margin-bottom:10px;background:#111;color:white;border:1px solid #555;}
+</style>
+</head>
 
-// IMPORT
-function importExcel(e){
-let file=e.target.files[0];
-let reader=new FileReader();
+<body>
 
-reader.onload=evt=>{
-let wb=XLSX.read(new Uint8Array(evt.target.result),{type:'array'});
-dataList=[];
+<h2>📊 TREKING MY REP</h2>
 
-wb.SheetNames.forEach(s=>{
-let json=XLSX.utils.sheet_to_json(wb.Sheets[s]);
+<div class="menu">
+<button onclick="showTab('data')">📋 Data</button>
+<button onclick="showTab('pivot')">📈 Pivot</button>
+</div>
 
-json.forEach(r=>{
-let stb=parseInt(r.STB)||0;
-let dpp=200000+stb*50000;
+<div class="btn-group">
+<button class="blue" onclick="exportExcel()">⬇ Download</button>
+<button class="orange" onclick="document.getElementById('upload').click()">⬆ Upload</button>
+<button class="orange" onclick="cekUpdate()">🔄 Update</button>
+<button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
+<button class="orange" onclick="editMassal()">✏ Edit Massal</button>
+<input type="file" id="upload">
+</div>
 
-dataList.push({
-id:r.ID||Math.floor(Math.random()*9999999),
-wo:r.WO||"",
-area:r.AREA||"",
-wotype:r["WO TYPE"]||"",
-stb:stb,
-dpp:dpp,
-amount:Math.round(dpp*1.11),
-remark:r.REMARK||"NOT PAID"
-});
-});
-});
-
-renderTable();
-};
-
-reader.readAsArrayBuffer(file);
-}
-
-// RENDER
-function renderTable(){
-let tbody=document.querySelector("#tableData tbody");
-tbody.innerHTML="";
-
-dataList.forEach((d,i)=>{
-tbody.innerHTML+=`
+<div id="data" class="tab active">
+<div class="table-wrap">
+<table id="tableData">
+<thead>
 <tr>
-<td>${i+1}</td>
-<td><input type="checkbox" data-id="${d.id}"></td>
-<td>${d.id}</td>
-<td>${d.wo}</td>
-<td>${d.area}</td>
-<td>${d.wotype}</td>
-<td>${d.stb}</td>
-<td>${d.dpp}</td>
-<td>${d.amount}</td>
-<td>${d.remark}</td>
-<td><button onclick="editData('${d.id}')">✏</button></td>
-</tr>`;
-});
-}
+<th>No</th>
+<th><input type="checkbox" id="checkAll"></th>
+<th>ID</th>
+<th>WO</th>
+<th>Area</th>
+<th>WO Type</th>
+<th>STB</th>
+<th>DPP</th>
+<th>Amount</th>
+<th>Remark</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
 
-// EDIT SINGLE
-function editData(id){
-let d=dataList.find(x=>x.id==id);
-currentEditId=id;
+<div id="pivot" class="tab">
+<h3>📈 Pivot Grafik</h3>
+<canvas id="chartPivot"></canvas>
+</div>
 
-edit_wo.value=d.wo;
-edit_area.value=d.area;
-edit_stb.value=d.stb;
-edit_remark.value=d.remark;
+<div id="modalEdit">
+<div class="box">
+<h3>Edit Data</h3>
+<input id="edit_wo">
+<input id="edit_area">
+<input id="edit_stb">
+<input id="edit_remark">
+<button onclick="saveEdit()" class="blue">Save</button>
+<button onclick="closeModal()" class="red">Close</button>
+</div>
+</div>
 
-modalEdit.style.display="flex";
-}
+<script src="myrep.js"></script>
 
-// ✅ EDIT MASSAL (FIX)
-function editMassal(){
-
-let checked=[...document.querySelectorAll("#tableData tbody input:checked")];
-
-if(checked.length===0){
-alert("gunakan checkbox dulu");
-return;
-}
-
-// ambil semua ID
-currentEditId=checked.map(c=>String(c.dataset.id));
-
-modalEdit.style.display="flex";
-}
-
-// ✅ SAVE (SUPPORT MASSAL)
-function saveEdit(){
-
-// massal
-if(Array.isArray(currentEditId)){
-dataList.forEach(d=>{
-if(currentEditId.includes(String(d.id))){
-d.remark=edit_remark.value||d.remark;
-}
-});
-}else{
-// single
-let d=dataList.find(x=>x.id==currentEditId);
-
-d.wo=edit_wo.value;
-d.area=edit_area.value;
-d.stb=parseInt(edit_stb.value)||0;
-d.dpp=200000+d.stb*50000;
-d.amount=Math.round(d.dpp*1.11);
-d.remark=edit_remark.value;
-}
-
-renderTable();
-closeModal();
-}
-
-// DELETE
-function hapusTerpilih(){
-let ids=[...document.querySelectorAll("#tableData tbody input:checked")]
-.map(c=>String(c.dataset.id));
-
-dataList=dataList.filter(d=>!ids.includes(String(d.id)));
-renderTable();
-}
-
-// EXPORT
-function exportExcel(){
-let ws=XLSX.utils.json_to_sheet(dataList);
-let wb=XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb,ws,"DATA");
-XLSX.writeFile(wb,"data.xlsx");
-}
-
-// PIVOT
-function generatePivot(){
-let g={};
-
-dataList.forEach(d=>{
-g[d.area]=(g[d.area]||0)+d.amount;
-});
-
-if(chart) chart.destroy();
-
-chart=new Chart(chartPivot,{
-type:'bar',
-data:{
-labels:Object.keys(g),
-datasets:[{label:'Total',data:Object.values(g)}]
-}
-});
-}
-
-function cekUpdate(){alert("OK");}
-function closeModal(){modalEdit.style.display="none";}
+</body>
+</html>
