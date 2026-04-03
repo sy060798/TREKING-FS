@@ -1,5 +1,6 @@
 let dataList = [], currentEditId = null, chart;
 
+// ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
 
 let upload = document.getElementById("upload");
@@ -17,9 +18,16 @@ document.querySelectorAll("#tableData tbody input[type=checkbox]")
 });
 }
 
+// 🔥 FIX penting (biar gak error tombol)
+window.edit_wo = document.getElementById("edit_wo");
+window.edit_area = document.getElementById("edit_area");
+window.edit_stb = document.getElementById("edit_stb");
+window.edit_remark = document.getElementById("edit_remark");
+window.modalEdit = document.getElementById("modalEdit");
+
 });
 
-// ================= UPLOAD =================
+// ================= TRIGGER UPLOAD =================
 function triggerUpload(){
 document.getElementById("upload").click();
 }
@@ -28,16 +36,26 @@ document.getElementById("upload").click();
 function importExcel(e){
 
 let file = e.target.files[0];
-if (!file) return alert("file tidak ada");
+
+if (!file){
+alert("file tidak ada");
+return;
+}
+
+console.log("UPLOAD OK:", file.name);
 
 let reader = new FileReader();
 
 reader.onload = evt => {
 
+try {
+
 let wb = XLSX.read(evt.target.result, { type: 'binary' });
+
 dataList = [];
 
 wb.SheetNames.forEach(s => {
+
 let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
 
 json.forEach(r => {
@@ -54,7 +72,7 @@ stb: stb,
 dpp: dpp,
 amount: Math.round(dpp * 1.11),
 remark: r.REMARK || "NOT PAID",
-server: "-"
+server: "-" // TAMBAHAN
 });
 
 });
@@ -63,16 +81,21 @@ server: "-"
 
 renderTable();
 
+} catch (err) {
+console.error(err);
+alert("gagal baca file");
+}
+
 };
 
 reader.readAsBinaryString(file);
 }
 
-// ================= TABLE =================
+// ================= RENDER =================
 function renderTable(){
 
 let tbody = document.querySelector("#tableData tbody");
-if(!tbody) return;
+if (!tbody) return;
 
 tbody.innerHTML = "";
 
@@ -81,10 +104,8 @@ tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
 return;
 }
 
-let html = "";
-
 dataList.forEach((d,i)=>{
-html += `
+tbody.innerHTML += `
 <tr>
 <td>${i+1}</td>
 <td><input type="checkbox" data-id="${d.id}"></td>
@@ -96,15 +117,13 @@ html += `
 <td>${d.dpp}</td>
 <td>${d.amount}</td>
 <td>${d.remark}</td>
-<td>${d.server || "-"}</td>
+<td>${d.server || "-"}</td> <!-- TAMBAHAN -->
 <td><button onclick="editData('${d.id}')">✏</button></td>
 </tr>`;
 });
-
-tbody.innerHTML = html;
 }
 
-// ================= SERVER =================
+// ================= 🚀 SERVER =================
 function kirimKeServer(){
 
 if(dataList.length === 0){
@@ -210,10 +229,7 @@ if(chart) chart.destroy();
 
 chart=new Chart(document.getElementById("chartPivot"),{
 type:'bar',
-data:{
-labels:Object.keys(g),
-datasets:[{label:"Total",data:Object.values(g)}]
-}
+data:{labels:Object.keys(g),datasets:[{label:"Total",data:Object.values(g)}]}
 });
 }
 
