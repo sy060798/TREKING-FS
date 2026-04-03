@@ -72,6 +72,8 @@ reader.readAsBinaryString(file);
 function renderTable(){
 
 let tbody = document.querySelector("#tableData tbody");
+if(!tbody) return;
+
 tbody.innerHTML = "";
 
 if(dataList.length === 0){
@@ -110,7 +112,7 @@ alert("data kosong");
 return;
 }
 
-fetch(" https://unalcoholised-discographically-gabriella.ngrok-free.dev", {
+fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/save", {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify(dataList)
