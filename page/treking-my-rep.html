@@ -161,9 +161,33 @@ border:1px solid #555;
 </div>
 
 <!-- TAB PIVOT -->
+<!-- TAB PIVOT -->
 <div id="pivot" class="tab">
 <h3>📈 Pivot Grafik</h3>
-<canvas id="chartPivot"></canvas>
+
+<!-- 🔽 FILTER -->
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+  <select id="filterArea" onchange="generatePivot()">
+    <option value="">Semua Area</option>
+  </select>
+
+  <select id="filterBulan" onchange="generatePivot()">
+    <option value="">Semua Bulan</option>
+  </select>
+
+  <select id="filterRemark" onchange="generatePivot()">
+    <option value="">Semua Status</option>
+    <option value="PAID">PAID</option>
+    <option value="NOT PAID">NOT PAID</option>
+  </select>
+</div>
+
+<!-- 📊 2 GRAFIK -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+  <canvas id="chartAmount"></canvas>
+  <canvas id="chartStatus"></canvas>
+</div>
+
 </div>
 
 <!-- MODAL -->
