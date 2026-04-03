@@ -11,23 +11,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if(upload){
         upload.addEventListener("change", importExcel);
     }
+
+    const checkAll = document.getElementById("checkAll");
+    if(checkAll){
+        checkAll.addEventListener("change", function(){
+            document.querySelectorAll('#tableData tbody input[type="checkbox"]')
+                .forEach(cb => cb.checked = this.checked);
+        });
+    }
 });
 
 // ================= TAB =================
 function showTab(tab){
-    document.querySelectorAll(".tab").forEach(t=>{
-        t.classList.remove("active");
-    });
-
-    const el = document.getElementById(tab);
-    if(el) el.classList.add("active");
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.getElementById(tab).classList.add("active");
 
     if(tab === "pivot"){
         generatePivot();
     }
 }
 
-// ================= IMPORT EXCEL =================
+// ================= IMPORT =================
 function importExcel(e){
     const file = e.target.files[0];
     if(!file){
@@ -37,21 +41,19 @@ function importExcel(e){
 
     const reader = new FileReader();
 
-    reader.onload = function(evt){
+    reader.onload = evt => {
         try{
-            const data = new Uint8Array(evt.target.result);
-            const wb = XLSX.read(data, {type:'array'});
-
+            const wb = XLSX.read(new Uint8Array(evt.target.result), {type:'array'});
             dataList = [];
 
-            wb.SheetNames.forEach(sheetName=>{
-                const ws = wb.Sheets[sheetName];
+            wb.SheetNames.forEach(sheet=>{
+                const ws = wb.Sheets[sheet];
                 const json = XLSX.utils.sheet_to_json(ws);
 
                 json.forEach(r=>{
-                    let stb = parseInt(r.STB) || 0;
-                    let dpp = 200000 + (stb * 50000);
-                    let amount = Math.round(dpp * 1.11);
+                    let stb = parseInt(r.STB)||0;
+                    let dpp = 200000 + stb*50000;
+                    let amount = Math.round(dpp*1.11);
 
                     dataList.push({
                         id: r.ID || r.Id || r.id || Math.floor(1000000 + Math.random()*9000000),
@@ -71,22 +73,20 @@ function importExcel(e){
 
         }catch(err){
             console.error(err);
-            alert("Error baca file ❌");
+            alert("Gagal baca file ❌");
         }
     };
 
     reader.readAsArrayBuffer(file);
 }
 
-// ================= RENDER TABLE =================
+// ================= RENDER =================
 function renderTable(){
     const tbody = document.querySelector("#tableData tbody");
-    if(!tbody) return;
-
     tbody.innerHTML = "";
 
     dataList.forEach((d,i)=>{
-        let row = `
+        tbody.innerHTML += `
         <tr>
             <td>${i+1}</td>
             <td><input type="checkbox" data-id="${d.id}"></td>
@@ -101,8 +101,8 @@ function renderTable(){
             <td>
                 <button onclick="editData('${d.id}')">✏</button>
             </td>
-        </tr>`;
-        tbody.innerHTML += row;
+        </tr>
+        `;
     });
 }
 
@@ -135,16 +135,19 @@ function editData(id){
     document.getElementById("modalEdit").style.display = "flex";
 }
 
-// ================= EDIT MASSAL =================
+// ================= EDIT MASSAL (FIX TOTAL) =================
 function editMassal(){
-    const checked = [...document.querySelectorAll("tbody input[type=checkbox]:checked")];
+
+    let checked = Array.from(
+        document.querySelectorAll('#tableData tbody input[type="checkbox"]')
+    ).filter(cb => cb.checked);
 
     if(checked.length === 0){
-        alert("Pilih data dulu ❌");
+        alert("gunakan checkbox dulu");
         return;
     }
 
-    currentEditId = checked.map(c => c.dataset.id);
+    currentEditId = checked.map(cb => cb.getAttribute("data-id"));
 
     document.getElementById("modalEdit").style.display = "flex";
 }
@@ -162,13 +165,13 @@ function saveEdit(){
         const d = dataList.find(x => String(x.id) === String(currentEditId));
         if(!d) return;
 
-        let stb = parseInt(document.getElementById("edit_stb").value) || 0;
+        let stb = parseInt(document.getElementById("edit_stb").value)||0;
 
         d.wo = document.getElementById("edit_wo").value;
         d.area = document.getElementById("edit_area").value;
         d.stb = stb;
-        d.dpp = 200000 + (stb * 50000);
-        d.amount = Math.round(d.dpp * 1.11);
+        d.dpp = 200000 + stb*50000;
+        d.amount = Math.round(d.dpp*1.11);
         d.remark = document.getElementById("edit_remark").value;
     }
 
@@ -176,13 +179,17 @@ function saveEdit(){
     closeModal();
 }
 
-// ================= DELETE =================
+// ================= DELETE (FIX TOTAL) =================
 function hapusTerpilih(){
-    const ids = [...document.querySelectorAll("tbody input:checked")]
-        .map(c => c.dataset.id);
+
+    let checked = Array.from(
+        document.querySelectorAll('#tableData tbody input[type="checkbox"]')
+    ).filter(cb => cb.checked);
+
+    let ids = checked.map(cb => cb.getAttribute("data-id"));
 
     if(ids.length === 0){
-        alert("Tidak ada yang dipilih ❌");
+        alert("tidak ada yang dipilih");
         return;
     }
 
