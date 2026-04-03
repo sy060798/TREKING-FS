@@ -232,24 +232,94 @@ window.addEventListener("load", function(){
 
 // ================= PIVOT =================
 function generatePivot(){
-  if(dataList.length === 0){
+  if(!dataList || dataList.length === 0){
     alert("Data kosong");
     return;
   }
 
-  let group = {};
-  dataList.forEach(d => {
-    let key = d.area || "UNKNOWN";
-    group[key] = (group[key] || 0) + d.amount;
+  let fArea = document.getElementById("filterArea").value;
+  let fBulan = document.getElementById("filterBulan").value;
+  let fRemark = document.getElementById("filterRemark").value;
+
+  // ================= FILTER DATA =================
+  let filtered = dataList.filter(d=>{
+    return (!fArea || d.area == fArea)
+        && (!fBulan || d.bulan == fBulan)
+        && (!fRemark || d.remark == fRemark);
   });
 
-  if(chart) chart.destroy();
+  if(filtered.length === 0){
+    alert("Data tidak ditemukan");
+    return;
+  }
 
-  chart = new Chart(document.getElementById("chartPivot"),{
+  // ================= GROUP AMOUNT =================
+  let groupAmount = {};
+  let statusCount = { PAID:0, "NOT PAID":0 };
+
+  filtered.forEach(d=>{
+    let area = d.area || "UNKNOWN";
+    let val = parseFloat(d.amount) || 0;
+
+    groupAmount[area] = (groupAmount[area] || 0) + val;
+
+    if(d.remark === "PAID") statusCount.PAID++;
+    else statusCount["NOT PAID"]++;
+  });
+
+  let sorted = Object.entries(groupAmount)
+    .sort((a,b)=> b[1] - a[1]);
+
+  let labels = sorted.map(x=>x[0]);
+  let values = sorted.map(x=>x[1]);
+
+  // ================= CHART 1 (AMOUNT) =================
+  if(chartAmount) chartAmount.destroy();
+
+  chartAmount = new Chart(document.getElementById("chartAmount"),{
     type:'bar',
     data:{
-      labels:Object.keys(group),
-      datasets:[{label:"Total",data:Object.values(group)}]
+      labels: labels,
+      datasets:[{
+        label:"Total Amount",
+        data: values
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        tooltip:{
+          callbacks:{
+            label: ctx => "Rp " + ctx.raw.toLocaleString("id-ID")
+          }
+        }
+      },
+      scales:{
+        y:{
+          ticks:{
+            callback: v => "Rp " + v.toLocaleString("id-ID")
+          }
+        }
+      }
+    }
+  });
+
+  // ================= CHART 2 (STATUS) =================
+  if(chartStatus) chartStatus.destroy();
+
+  chartStatus = new Chart(document.getElementById("chartStatus"),{
+    type:'pie',
+    data:{
+      labels:["PAID","NOT PAID"],
+      datasets:[{
+        data:[statusCount.PAID, statusCount["NOT PAID"]]
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ position:'bottom' }
+      }
     }
   });
 }
