@@ -250,9 +250,15 @@ function closeModal(){
   modalEdit.style.display = "none";
 }
 
+// ================= GLOBAL =================
+let dataList = [];
+let currentEditId = null;
+let chart = null;
+const SERVER_URL = "https://xxxx-xx-xx-xx-xx.ngrok-free.dev"; // ganti ini sesuai ngrok
+
 // ================= AUTO LOAD DATA =================
 window.addEventListener("load", function(){
-  fetch("https://unalcoholised-discographically-gabriella.ngrok-free.dev/api/get")
+  fetch(`${SERVER_URL}/api/get`)
   .then(res => res.json())
   .then(res => {
     if(res && res.length > 0){
@@ -263,5 +269,29 @@ window.addEventListener("load", function(){
   })
   .catch(err => {
     console.log("Server belum aktif / kosong");
+  });
+});
+
+// ================= KIRIM KE SERVER =================
+function kirimKeServer(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
+
+  fetch(`${SERVER_URL}/api/save`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(dataList)
+  })
+  .then(res => res.json())
+  .then(res => {
+    dataList.forEach(d => d.server = "✔ terkirim");
+    renderTable();
+    alert("Berhasil kirim ke server");
+  })
+  .catch(err=>{
+    console.error(err);
+    alert("Gagal kirim ke server");
   });
 });
