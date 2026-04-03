@@ -1,20 +1,12 @@
 let dataList = [], currentEditId = null, chart;
 
-// ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
 
 let upload = document.getElementById("upload");
 
 if (upload) {
-
-// FIX: reset value biar bisa upload file sama berulang
-upload.addEventListener("click", () => {
-upload.value = null;
-});
-
-// FIX: change pasti ke-trigger
+upload.addEventListener("click", () => { upload.value = null; });
 upload.addEventListener("change", importExcel);
-
 }
 
 let checkAll = document.getElementById("checkAll");
@@ -27,7 +19,7 @@ document.querySelectorAll("#tableData tbody input[type=checkbox]")
 
 });
 
-// ================= TRIGGER UPLOAD =================
+// ================= UPLOAD =================
 function triggerUpload(){
 document.getElementById("upload").click();
 }
@@ -36,29 +28,17 @@ document.getElementById("upload").click();
 function importExcel(e){
 
 let file = e.target.files[0];
-
-if (!file){
-alert("file tidak ada");
-return;
-}
-
-console.log("UPLOAD OK:", file.name); // DEBUG
+if (!file) return alert("file tidak ada");
 
 let reader = new FileReader();
 
 reader.onload = evt => {
 
-try {
-
 let wb = XLSX.read(evt.target.result, { type: 'binary' });
-
 dataList = [];
 
 wb.SheetNames.forEach(s => {
-
 let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
-
-console.log("Sheet:", s, json.length);
 
 json.forEach(r => {
 
@@ -73,44 +53,36 @@ wotype: r["WO TYPE"] || "",
 stb: stb,
 dpp: dpp,
 amount: Math.round(dpp * 1.11),
-remark: r.REMARK || "NOT PAID"
+remark: r.REMARK || "NOT PAID",
+server: "-"
 });
 
 });
 
 });
 
-console.log("DATA MASUK:", dataList.length);
-
-// FIX PENTING
 renderTable();
-
-} catch (err) {
-console.error(err);
-alert("gagal baca file");
-}
 
 };
 
-// FIX penting → binary
 reader.readAsBinaryString(file);
 }
 
-// ================= RENDER =================
+// ================= TABLE =================
 function renderTable(){
 
 let tbody = document.querySelector("#tableData tbody");
-if (!tbody) return;
-
 tbody.innerHTML = "";
 
 if(dataList.length === 0){
-tbody.innerHTML = `<tr><td colspan="11">Tidak ada data</td></tr>`;
+tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
 return;
 }
 
+let html = "";
+
 dataList.forEach((d,i)=>{
-tbody.innerHTML += `
+html += `
 <tr>
 <td>${i+1}</td>
 <td><input type="checkbox" data-id="${d.id}"></td>
@@ -122,12 +94,43 @@ tbody.innerHTML += `
 <td>${d.dpp}</td>
 <td>${d.amount}</td>
 <td>${d.remark}</td>
+<td>${d.server || "-"}</td>
 <td><button onclick="editData('${d.id}')">✏</button></td>
 </tr>`;
 });
+
+tbody.innerHTML = html;
 }
 
-// ================= SISANYA TIDAK DIUBAH =================
+// ================= SERVER =================
+function kirimKeServer(){
+
+if(dataList.length === 0){
+alert("data kosong");
+return;
+}
+
+fetch(" https://unalcoholised-discographically-gabriella.ngrok-free.dev", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(dataList)
+})
+.then(res => res.json())
+.then(res => {
+
+dataList.forEach(d => d.server = "✔ terkirim");
+renderTable();
+
+alert("berhasil kirim ke server");
+})
+.catch(err => {
+console.error(err);
+alert("gagal kirim");
+});
+
+}
+
+// ================= SISANYA =================
 function showTab(tab){
 document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
 document.getElementById(tab).classList.add("active");
@@ -194,15 +197,21 @@ XLSX.writeFile(wb,"data.xlsx");
 
 function generatePivot(){
 if(dataList.length===0) return alert("data kosong");
+
 let g={};
 dataList.forEach(d=>{
 let key=d.area||"UNKNOWN";
 g[key]=(g[key]||0)+d.amount;
 });
+
 if(chart) chart.destroy();
+
 chart=new Chart(document.getElementById("chartPivot"),{
 type:'bar',
-data:{labels:Object.keys(g),datasets:[{label:"Total",data:Object.values(g)}]}
+data:{
+labels:Object.keys(g),
+datasets:[{label:"Total",data:Object.values(g)}]
+}
 });
 }
 
