@@ -1,8 +1,3 @@
-// ================= GLOBAL =================
-let dataList = [];
-let currentEditId = null;
-let chart = null;
-
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", function(){
 
