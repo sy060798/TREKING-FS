@@ -83,11 +83,17 @@ function renderTable(){
   let tbody = document.querySelector("#tableData tbody");
   if(!tbody) return;
   tbody.innerHTML = "";
+
   if(dataList.length===0){
     tbody.innerHTML=`<tr><td colspan="12">Tidak ada data</td></tr>`;
     return;
   }
+
   dataList.forEach((d,i)=>{
+
+    // 🔥 FIX: skip data rusak
+    if(!d || typeof d !== "object") return;
+
     let tr = document.createElement("tr");
     tr.innerHTML=`
       <td>${i+1}</td>
@@ -173,6 +179,10 @@ function exportExcel(){
 // ================= SERVER =================
 async function kirimKeServer(){
   if(dataList.length===0){ alert("Data kosong"); return; }
+
+  // 🔥 FIX: pastikan tidak nested
+  dataList = dataList.flat();
+
   try{
     let res=await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
@@ -191,12 +201,22 @@ window.addEventListener("load",async function(){
   try{
     let res=await fetch(`${SERVER_URL}/api/get`);
     if(!res.ok) throw new Error("Server mati");
+
     let json=await res.json();
-    if(json && json.length>0){
-      dataList=json;
+    console.log("DATA DARI SERVER:", json);
+
+    if(Array.isArray(json) && json.length>0){
+
+      // 🔥 FIX: handle nested array
+      dataList = json.flat();
+
+      // 🔥 buang data invalid
+      dataList = dataList.filter(d => d && typeof d === "object");
+
       dataList.forEach(d=>d.server="✔ dari server");
       renderTable();
     }
+
   }catch(err){ console.log("Server belum aktif / kosong"); }
 });
 
