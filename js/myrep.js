@@ -3,7 +3,7 @@ let dataList = [];
 let currentEditId = null;
 let chart = null;
 
-// 🔥 SERVER URL
+// 🔥 SERVER
 const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
 // ================= INIT ==================
@@ -64,19 +64,30 @@ function importExcel(e){
 
       wb.SheetNames.forEach(s => {
         let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
+
         json.forEach(r => {
+
+          // 🔥 ambil STB kalau ada (kalau tidak = 0)
+          let stb = parseInt(r.STB) || 0;
+
+          // 🔥 sistem lama tetap
+          let dpp = 200000 + stb * 50000;
 
           dataList.push({
             id: r.ID || Date.now()+Math.random(),
             wo: r.WO || "",
             area: r.AREA || "",
             wotype: r["WO TYPE"] || "",
+
+            // tambahan (tidak ganggu sistem lama)
             tahun: r.TAHUN || "",
             month: r.MONTH || "",
             tanggal: r.TANGGALPENGERJAAN || "",
 
-            // 🔥 FIX: BALIKIN INI
-            stb: parseInt(r.STB) || 0,
+            // 🔥 WAJIB ADA (SISTEM LAMA)
+            stb: stb,
+            dpp: dpp,
+            amount: Math.round(dpp * 1.11),
             remark: r.REMARK || "NOT PAID",
 
             server: "-"
@@ -113,15 +124,14 @@ function renderTable(){
     tr.innerHTML = `
       <td>${i+1}</td>
       <td><input type="checkbox" data-id="${d.id}"></td>
+      <td>${d.id}</td>
+      <td>${d.wo}</td>
+      <td>${d.area}</td>
       <td>${d.wotype}</td>
-      <td>${d.tahun}</td>
-      <td>${d.month}</td>
-      <td>${d.tanggal}</td>
-
-      <!-- 🔥 TAMBAHAN -->
       <td>${d.stb}</td>
+      <td>${d.dpp}</td>
+      <td>${d.amount}</td>
       <td>${d.remark}</td>
-
       <td>${d.server || "-"}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
@@ -167,6 +177,8 @@ function saveEdit(){
     d.wo = edit_wo.value;
     d.area = edit_area.value;
     d.stb = parseInt(edit_stb.value) || 0;
+    d.dpp = 200000 + d.stb * 50000;
+    d.amount = Math.round(d.dpp * 1.11);
     d.remark = edit_remark.value;
   }
   renderTable();
@@ -205,7 +217,7 @@ async function kirimKeServer(){
     let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(dataList) // 🔥 FIX DI SINI
+      body: JSON.stringify(dataList) // ✅ FIX
     });
 
     if(!res.ok) throw new Error("Server error");
