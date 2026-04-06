@@ -95,6 +95,13 @@ thead th{
   color:white;
   border:1px solid #555;
 }
+
+  canvas{
+  height:280px !important;
+  background:#1a1a1a;
+  padding:10px;
+  border-radius:10px;
+}
 #upload{display:none;}
 </style>
 </head>
@@ -149,7 +156,7 @@ thead th{
 <div id="pivot" class="tab">
 <h3>📈 Pivot Grafik</h3>
 
-<!-- 🔥 FILTER DI ATAS -->
+<!-- 🔥 FILTER -->
 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
   <select id="filterArea" onchange="generatePivot()">
     <option value="">Semua Area</option>
@@ -166,10 +173,14 @@ thead th{
   </select>
 </div>
 
-<!-- 🔥 3 CHART -->
+<!-- 🔥 CHART ATAS (2 KIRI KANAN) -->
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
   <canvas id="chartAmount"></canvas>
   <canvas id="chartStatus"></canvas>
+</div>
+
+<!-- 🔥 CHART BAWAH (FULL) -->
+<div style="margin-top:20px;">
   <canvas id="chartAreaStatus"></canvas>
 </div>
 
