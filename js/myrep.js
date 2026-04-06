@@ -91,7 +91,7 @@ function renderTable(){
 
   dataList.forEach((d,i)=>{
 
-    // 🔥 FIX: skip data rusak
+    // 🔥 TAMBAHAN: anti error
     if(!d || typeof d !== "object") return;
 
     let tr = document.createElement("tr");
@@ -100,8 +100,8 @@ function renderTable(){
       <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.id}</td>
       <td>${d.wo}</td>
-      <td>${d.tanggal || "-"}</td>
-      <td>${d.month || "-"}</td>
+      <td>${d.tanggal || "-"}</td>   <!-- 🔥 TAMBAHAN -->
+      <td>${d.month || "-"}</td>     <!-- 🔥 TAMBAHAN -->
       <td>${d.area}</td>
       <td>${d.wotype}</td>
       <td>${d.stb}</td>
@@ -162,10 +162,30 @@ function saveEdit(){
 function closeModal(){ modalEdit.style.display="none"; currentEditId=null; }
 
 // ================= HAPUS =================
-function hapusTerpilih(){
+async function hapusTerpilih(){
   let ids=[...document.querySelectorAll("#tableData tbody input:checked")]
     .map(c=>String(c.dataset.id));
-  dataList=dataList.filter(d=>!ids.includes(String(d.id)));
+
+  if(ids.length===0){
+    alert("Pilih data dulu");
+    return;
+  }
+
+  // hapus di frontend
+  dataList = dataList.filter(d=>!ids.includes(String(d.id)));
+
+  // 🔥 TAMBAHAN: hapus di server
+  try{
+    await fetch(`${SERVER_URL}/api/delete`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(ids)
+    });
+  }catch(err){
+    console.error(err);
+    alert("Gagal hapus server");
+  }
+
   renderTable();
 }
 
@@ -182,7 +202,7 @@ function exportExcel(){
 async function kirimKeServer(){
   if(dataList.length===0){ alert("Data kosong"); return; }
 
-  // 🔥 FIX: pastikan tidak nested
+  // 🔥 TAMBAHAN: fix nested
   dataList = dataList.flat();
 
   try{
@@ -209,10 +229,10 @@ window.addEventListener("load",async function(){
 
     if(Array.isArray(json) && json.length>0){
 
-      // 🔥 FIX: handle nested array
+      // 🔥 TAMBAHAN: fix nested
       dataList = json.flat();
 
-      // 🔥 buang data invalid
+      // 🔥 TAMBAHAN: bersihkan data
       dataList = dataList.filter(d => d && typeof d === "object");
 
       dataList.forEach(d=>d.server="✔ dari server");
