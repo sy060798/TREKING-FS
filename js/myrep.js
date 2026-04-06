@@ -100,7 +100,7 @@ function renderTable(){
       <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.id}</td>
       <td>${d.wo}</td>
-      <td>${d.tanggal || "-"}</td>   <!-- 🔥 TAMBAHAN -->
+      <td>${formatTanggalExcel(d.tanggal)}</td>   <!-- 🔥 TAMBAHAN -->
       <td>${d.month || "-"}</td>     <!-- 🔥 TAMBAHAN -->
       <td>${d.area}</td>
       <td>${d.wotype}</td>
@@ -190,6 +190,24 @@ async function hapusTerpilih(){
 }
 
 // ================= EXPORT =================
+function formatTanggalExcel(serial){
+  if(!serial) return "-";
+
+  // kalau sudah format tanggal
+  if(typeof serial === "string" && serial.includes("-")){
+    return serial;
+  }
+
+  let utc_days  = Math.floor(serial - 25569);
+  let utc_value = utc_days * 86400;
+  let date_info = new Date(utc_value * 1000);
+
+  let dd = String(date_info.getDate()).padStart(2, '0');
+  let mm = String(date_info.getMonth() + 1).padStart(2, '0');
+  let yyyy = date_info.getFullYear();
+
+  return `${dd}-${mm}-${yyyy}`;
+}
 function exportExcel(){
   if(dataList.length===0){ alert("Data kosong"); return; }
   let ws=XLSX.utils.json_to_sheet(dataList);
