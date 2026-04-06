@@ -329,31 +329,30 @@ function formatRupiah(angka){
 }
 
 // ================= PIVOT =================
-function generatePivot(){
+function generatePivot() {
 
-  if(!Array.isArray(dataList) || dataList.length === 0){
+  if (!Array.isArray(dataList) || dataList.length === 0) {
     console.log("Data kosong");
     return;
   }
 
   // 🔥 FILTER
-  const areaFilter   = document.getElementById("filterArea")?.value || "";
-  const bulanFilter  = document.getElementById("filterBulan")?.value || "";
+  const areaFilter = document.getElementById("filterArea")?.value || "";
+  const bulanFilter = document.getElementById("filterBulan")?.value || "";
   const remarkFilter = document.getElementById("filterRemark")?.value || "";
 
   const filteredData = dataList.filter(d =>
     d &&
-    (!areaFilter  || d.area   === areaFilter) &&
-    (!bulanFilter || d.month  === bulanFilter) &&
-    (!remarkFilter|| d.remark === remarkFilter)
+    (!areaFilter || d.area === areaFilter) &&
+    (!bulanFilter || d.month === bulanFilter) &&
+    (!remarkFilter || d.remark === remarkFilter)
   );
 
   // 🔥 CEK CANVAS
   const ctx1 = document.getElementById("chartAmount");
   const ctx2 = document.getElementById("chartStatus");
-  const ctx3 = document.getElementById("chartAreaStatus");
 
-  if(!ctx1 || !ctx2 || !ctx3){
+  if (!ctx1 || !ctx2) {
     console.log("Canvas belum siap");
     return;
   }
@@ -362,15 +361,12 @@ function generatePivot(){
   // 🔥 HITUNG SEMUA (COUNT + AMOUNT)
   // =========================
   let areaMap = {};
-  let areaStatus = {};
-
   let paidCount = 0;
   let notPaidCount = 0;
-
   let paidAmount = 0;
   let notPaidAmount = 0;
 
-  filteredData.forEach(d=>{
+  filteredData.forEach(d => {
     const area = d.area || "UNKNOWN";
     const amount = Number(d.amount) || 0;
     const isPaid = (d.remark || "").toUpperCase() === "PAID";
@@ -379,77 +375,59 @@ function generatePivot(){
     areaMap[area] = (areaMap[area] || 0) + amount;
 
     // GLOBAL
-    if(isPaid){
+    if (isPaid) {
       paidCount++;
       paidAmount += amount;
     } else {
       notPaidCount++;
       notPaidAmount += amount;
     }
-
-    // PER AREA
-    if(!areaStatus[area]){
-      areaStatus[area] = {
-        paidCount:0,
-        notPaidCount:0,
-        paidAmount:0,
-        notPaidAmount:0
-      };
-    }
-
-    if(isPaid){
-      areaStatus[area].paidCount++;
-      areaStatus[area].paidAmount += amount;
-    } else {
-      areaStatus[area].notPaidCount++;
-      areaStatus[area].notPaidAmount += amount;
-    }
   });
 
   // =========================
   // 1. CHART TOTAL AMOUNT
   // =========================
-  if(chartAmount) chartAmount.destroy();
+  if (chartAmount) chartAmount.destroy();
 
   chartAmount = new Chart(ctx1, {
-    type:"bar",
-    data:{
-      labels:Object.keys(areaMap),
-      datasets:[{
-        label:"Total Amount (Rp)",
-        data:Object.values(areaMap),
-        backgroundColor:"#4f46e5"
+    type: "bar",
+    data: {
+      labels: Object.keys(areaMap),
+      datasets: [{
+        label: "Total Amount (Rp)",
+        data: Object.values(areaMap),
+        backgroundColor: "#4f46e5"
       }]
     },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
     }
   });
 
   // =========================
   // 2. STATUS (COUNT) → BAR
   // =========================
-  if(chartStatus) chartStatus.destroy();
+  if (chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
-    type:"bar",
-    data:{
-      labels:["PAID","NOT PAID"],
-      datasets:[{
-        label:"Jumlah Data",
-        data:[paidCount, notPaidCount],
-        backgroundColor:["#22c55e","#ef4444"]
+    type: "bar",
+    data: {
+      labels: ["PAID", "NOT PAID"],
+      datasets: [{
+        label: "Jumlah Data",
+        data: [paidCount, notPaidCount],
+        backgroundColor: ["#22c55e", "#ef4444"]
       }]
     },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{ display:false },
-        tooltip:{
-          callbacks:{
-            label:(ctx)=>`Count: ${ctx.raw}`
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `Count: ${ctx.raw}`
           }
         }
       }
@@ -457,41 +435,9 @@ function generatePivot(){
   });
 
   // =========================
-  // 3. AREA STATUS (COUNT)
-  // =========================
-  if(chartAreaStatus) chartAreaStatus.destroy();
-
-  chartAreaStatus = new Chart(ctx3, {
-    type:"bar",
-    data:{
-      labels:Object.keys(areaStatus),
-      datasets:[
-        {
-          label:"PAID",
-          data:Object.values(areaStatus).map(v=>v.paidCount),
-          backgroundColor:"#22c55e"
-        },
-        {
-          label:"NOT PAID",
-          data:Object.values(areaStatus).map(v=>v.notPaidCount),
-          backgroundColor:"#ef4444"
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      scales:{
-        x:{ stacked:false },
-        y:{ beginAtZero:true }
-      }
-    }
-  });
-
-  // =========================
   // 🔥 KIRIM KE TABLE
   // =========================
-  renderPivotTable(areaStatus, {
+  renderPivotTable(areaMap, {
     paidCount,
     notPaidCount,
     paidAmount,
