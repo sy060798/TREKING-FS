@@ -288,6 +288,7 @@ async function kirimKeServer(){
     dataList.forEach(d=>d.server="✔ terkirim");
     renderTable();
     loadFilter();
+    generatePivot();
     alert("Berhasil kirim ke server");
   }catch(err){ console.error(err); alert("Gagal kirim ke server"); }
 }
@@ -312,6 +313,7 @@ window.addEventListener("load",async function(){
       dataList.forEach(d=>d.server="✔ dari server");
       renderTable();
       loadFilter();
+      generatePivot();
     }
 
   }catch(err){ console.log("Server belum aktif / kosong"); }
@@ -331,6 +333,77 @@ function formatRupiah(angka){
 // ================= PIVOT =================
 function generatePivot() {
 
+// ==================== LOAD FILTER ====================
+function loadFilter(){
+  const areaSel = document.getElementById("filterArea");
+  const bulanSel = document.getElementById("filterBulan");
+  if(!areaSel || !bulanSel) return;
+
+  // Ambil nilai unik dari dataList
+  const areas = [...new Set(dataList.map(d=>d.area).filter(Boolean))];
+  const months = [...new Set(dataList.map(d=>d.month).filter(Boolean))];
+
+  // Reset options
+  areaSel.innerHTML = `<option value="">Semua Area</option>`;
+  bulanSel.innerHTML = `<option value="">Semua Bulan</option>`;
+
+  areas.forEach(a=>{
+    let opt = document.createElement("option");
+    opt.value = a;
+    opt.textContent = a;
+    areaSel.appendChild(opt);
+  });
+
+  months.forEach(m=>{
+    let opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = m;
+    bulanSel.appendChild(opt);
+  });
+}
+
+// ==================== RENDER PIVOT TABLE ====================
+function renderPivotTable(areaMap, totals){
+  const tbody = document.getElementById("pivotBody");
+  const totalRow = document.getElementById("pivotTotal");
+  if(!tbody || !totalRow) return;
+
+  tbody.innerHTML = "";
+
+  Object.keys(areaMap).forEach(area=>{
+    let paidCount=0, notPaidCount=0, paidAmount=0, notPaidAmount=0;
+
+    dataList.forEach(d=>{
+      if(d.area !== area) return;
+      if((d.remark||"").toUpperCase()==="PAID"){
+        paidCount++; paidAmount += Number(d.amount)||0;
+      } else {
+        notPaidCount++; notPaidAmount += Number(d.amount)||0;
+      }
+    });
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${area}</td>
+      <td>${paidCount}</td>
+      <td>${notPaidCount}</td>
+      <td>${formatRupiah(paidAmount)}</td>
+      <td>${formatRupiah(notPaidAmount)}</td>
+      <td>${formatRupiah(paidAmount + notPaidAmount)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  totalRow.innerHTML = `
+    <td>Total</td>
+    <td>${totals.paidCount}</td>
+    <td>${totals.notPaidCount}</td>
+    <td>${formatRupiah(totals.paidAmount)}</td>
+    <td>${formatRupiah(totals.notPaidAmount)}</td>
+    <td>${formatRupiah(totals.paidAmount + totals.notPaidAmount)}</td>
+  `;
+}
+  
   if (!Array.isArray(dataList) || dataList.length === 0) {
     console.log("Data kosong");
     return;
