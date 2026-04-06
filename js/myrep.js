@@ -431,7 +431,7 @@ function renderPivotTable(areaDetail){
     tbody.appendChild(tr);
   });
 
-  // 🔥 TOTAL ROW
+  // ✅ BARIS TOTAL (FIX)
   const trTotal = document.createElement("tr");
   trTotal.innerHTML = `
     <td><b>TOTAL</b></td>
@@ -442,7 +442,6 @@ function renderPivotTable(areaDetail){
   `;
   tbody.appendChild(trTotal);
 }
-
 // ================= PIVOT =================
 function generatePivot() {
 
