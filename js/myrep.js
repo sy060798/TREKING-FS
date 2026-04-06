@@ -302,6 +302,14 @@ window.addEventListener("load",async function(){
 // ================= TAMBAHAN =================
 function triggerUpload(){ document.getElementById('upload').click(); }
 
+// ================= GLOBAL CHART =================
+let chartAmount, chartStatus, chartAreaStatus;
+
+// ================= FORMAT RUPIAH =================
+function formatRupiah(angka){
+  return 'Rp ' + Number(angka).toLocaleString('id-ID');
+}
+
 // ================= PIVOT =================
 function generatePivot(){
 
@@ -333,32 +341,51 @@ function generatePivot(){
   }
 
   // =========================
-  // 🔥 SATU LOOP SEMUA HITUNGAN
+  // 🔥 HITUNG SEMUA (COUNT + AMOUNT)
   // =========================
   let areaMap = {};
   let areaStatus = {};
-  let paid = 0;
-  let notPaid = 0;
+
+  let paidCount = 0;
+  let notPaidCount = 0;
+
+  let paidAmount = 0;
+  let notPaidAmount = 0;
 
   filteredData.forEach(d=>{
     const area = d.area || "UNKNOWN";
-    const amount = d.amount || 0;
+    const amount = Number(d.amount) || 0;
     const isPaid = (d.remark || "").toUpperCase() === "PAID";
 
-    // TOTAL AMOUNT
+    // TOTAL AMOUNT PER AREA
     areaMap[area] = (areaMap[area] || 0) + amount;
 
-    // STATUS GLOBAL
-    if(isPaid) paid += amount;
-    else notPaid += amount;
-
-    // STATUS PER AREA
-    if(!areaStatus[area]){
-      areaStatus[area] = { paid:0, notPaid:0 };
+    // GLOBAL
+    if(isPaid){
+      paidCount++;
+      paidAmount += amount;
+    } else {
+      notPaidCount++;
+      notPaidAmount += amount;
     }
 
-    if(isPaid) areaStatus[area].paid += amount;
-    else areaStatus[area].notPaid += amount;
+    // PER AREA
+    if(!areaStatus[area]){
+      areaStatus[area] = {
+        paidCount:0,
+        notPaidCount:0,
+        paidAmount:0,
+        notPaidAmount:0
+      };
+    }
+
+    if(isPaid){
+      areaStatus[area].paidCount++;
+      areaStatus[area].paidAmount += amount;
+    } else {
+      areaStatus[area].notPaidCount++;
+      areaStatus[area].notPaidAmount += amount;
+    }
   });
 
   // =========================
@@ -371,29 +398,48 @@ function generatePivot(){
     data:{
       labels:Object.keys(areaMap),
       datasets:[{
-        label:"Total Amount",
-        data:Object.values(areaMap)
+        label:"Total Amount (Rp)",
+        data:Object.values(areaMap),
+        backgroundColor:"#4f46e5"
       }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
     }
   });
 
   // =========================
-  // 2. PIE CHART STATUS
+  // 2. STATUS (COUNT) → BAR
   // =========================
   if(chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
-    type:"pie",
+    type:"bar",
     data:{
       labels:["PAID","NOT PAID"],
       datasets:[{
-        data:[paid, notPaid]
+        label:"Jumlah Data",
+        data:[paidCount, notPaidCount],
+        backgroundColor:["#22c55e","#ef4444"]
       }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label:(ctx)=>`Count: ${ctx.raw}`
+          }
+        }
+      }
     }
   });
 
   // =========================
-  // 3. STACKED AREA STATUS
+  // 3. AREA STATUS (COUNT)
   // =========================
   if(chartAreaStatus) chartAreaStatus.destroy();
 
@@ -404,26 +450,33 @@ function generatePivot(){
       datasets:[
         {
           label:"PAID",
-          data:Object.values(areaStatus).map(v=>v.paid)
+          data:Object.values(areaStatus).map(v=>v.paidCount),
+          backgroundColor:"#22c55e"
         },
         {
           label:"NOT PAID",
-          data:Object.values(areaStatus).map(v=>v.notPaid)
+          data:Object.values(areaStatus).map(v=>v.notPaidCount),
+          backgroundColor:"#ef4444"
         }
       ]
     },
     options:{
       responsive:true,
-      maintainAspectRatio:false, // 🔥 biar ikut CSS
+      maintainAspectRatio:false,
       scales:{
-        x:{ stacked:true },
-        y:{ stacked:true }
+        x:{ stacked:false },
+        y:{ beginAtZero:true }
       }
     }
   });
 
   // =========================
-  // 4. TABLE
+  // 🔥 KIRIM KE TABLE
   // =========================
-  renderPivotTable(filteredData);
+  renderPivotTable(areaStatus, {
+    paidCount,
+    notPaidCount,
+    paidAmount,
+    notPaidAmount
+  });
 }
