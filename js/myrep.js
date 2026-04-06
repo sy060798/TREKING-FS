@@ -1,8 +1,8 @@
 // ================= GLOBAL =================
 let dataList = [];
 let currentEditId = null;
+let chart = null;
 
-// 🔥 SERVER
 const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
 // ================= HARGA AREA =================
@@ -21,7 +21,7 @@ function getHarga(area){
   return 200000;
 }
 
-// ================= INIT =================
+// ================= INIT ==================
 document.addEventListener("DOMContentLoaded", function(){
 
   window.edit_wo = document.getElementById("edit_wo");
@@ -32,7 +32,16 @@ document.addEventListener("DOMContentLoaded", function(){
 
   let upload = document.getElementById("upload");
   if(upload){
+    upload.addEventListener("click", ()=>upload.value = null);
     upload.addEventListener("change", importExcel);
+  }
+
+  let checkAll = document.getElementById("checkAll");
+  if(checkAll){
+    checkAll.addEventListener("change", function(e){
+      document.querySelectorAll("#tableData tbody input[type=checkbox]")
+      .forEach(c => c.checked = e.target.checked);
+    });
   }
 
 });
@@ -54,24 +63,22 @@ function importExcel(e){
 
       wb.SheetNames.forEach(s => {
         let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
-
         json.forEach(r => {
 
           let stb = parseInt(r.STB) || 0;
-
           let harga = getHarga(r.AREA);
           let dpp = harga + (stb * 50000);
 
           dataList.push({
-            id: r.ID || Date.now(),
+            id: r.ID || Date.now()+Math.random(),
             wo: r.WO || "",
             area: r.AREA || "",
             wotype: r["WO TYPE"] || "",
-
             tahun: r.TAHUN || "",
             month: r.MONTH || "",
             tanggal: r.TANGGALPENGERJAAN || "",
 
+            // 🔥 TAMBAHAN TANPA GANGGU SISTEM
             stb: stb,
             dpp: dpp,
             amount: Math.round(dpp * 1.11),
@@ -86,6 +93,7 @@ function importExcel(e){
       renderTable();
 
     }catch(err){
+      console.error(err);
       alert("Gagal baca file");
     }
   };
@@ -100,22 +108,23 @@ function renderTable(){
 
   tbody.innerHTML = "";
 
+  if(dataList.length === 0){
+    tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
+    return;
+  }
+
   dataList.forEach((d,i)=>{
     let tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${i+1}</td>
-      <td>${d.id}</td>
-      <td>${d.wo}</td>
-      <td>${d.area}</td>
+      <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.wotype}</td>
-      <td>${d.stb}</td>
-      <td>${d.dpp}</td>
-      <td>${d.amount}</td>
-      <td>${d.remark}</td>
+      <td>${d.tahun}</td>
+      <td>${d.month}</td>
+      <td>${d.tanggal}</td>
+      <td>${d.server || "-"}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
-
     tbody.appendChild(tr);
   });
 }
@@ -123,56 +132,126 @@ function renderTable(){
 // ================= EDIT =================
 function editData(id){
   currentEditId = id;
-
   let d = dataList.find(x => String(x.id) === String(id));
   if(!d) return;
 
   edit_wo.value = d.wo;
   edit_area.value = d.area;
-  edit_stb.value = d.stb;
-  edit_remark.value = d.remark;
+  edit_stb.value = d.stb || 0;
+  edit_remark.value = d.remark || "";
+  modalEdit.style.display = "flex";
+}
 
-  modalEdit.style.display = "block";
+// ================= EDIT MASSAL =================
+function editMassal(){
+  let checked = [...document.querySelectorAll("#tableData tbody input:checked")];
+  if(checked.length === 0){
+    alert("Pilih data dulu");
+    return;
+  }
+  currentEditId = checked.map(c => String(c.dataset.id));
+  modalEdit.style.display = "flex";
 }
 
 // ================= SAVE =================
 function saveEdit(){
-  let d = dataList.find(x => String(x.id) === String(currentEditId));
-  if(!d) return;
+  if(Array.isArray(currentEditId)){
+    dataList.forEach(d => {
+      if(currentEditId.includes(String(d.id))){
+        d.remark = edit_remark.value || d.remark;
+      }
+    });
+  }else{
+    let d = dataList.find(x => String(x.id) === String(currentEditId));
+    if(!d) return;
 
-  d.wo = edit_wo.value;
-  d.area = edit_area.value;
-  d.stb = parseInt(edit_stb.value) || 0;
+    d.wo = edit_wo.value;
+    d.area = edit_area.value;
+    d.stb = parseInt(edit_stb.value) || 0;
 
-  let harga = getHarga(d.area);
-  d.dpp = harga + (d.stb * 50000);
-  d.amount = Math.round(d.dpp * 1.11);
+    let harga = getHarga(d.area);
+    d.dpp = harga + (d.stb * 50000);
+    d.amount = Math.round(d.dpp * 1.11);
 
-  d.remark = edit_remark.value;
+    d.remark = edit_remark.value;
+  }
 
   renderTable();
   closeModal();
 }
 
-// ================= CLOSE =================
+// ================= CLOSE MODAL =================
 function closeModal(){
-  modalEdit.style.display = "none";
+  if(modalEdit){
+    modalEdit.style.display = "none";
+  }
   currentEditId = null;
 }
 
-// ❌ HAPUS window.onclick (ini penyebab tombol mati)
+// ================= HAPUS =================
+function hapusTerpilih(){
+  let ids = [...document.querySelectorAll("#tableData tbody input:checked")]
+    .map(c => String(c.dataset.id));
+  dataList = dataList.filter(d => !ids.includes(String(d.id)));
+  renderTable();
+}
+
+// ================= EXPORT =================
+function exportExcel(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
+
+  let ws = XLSX.utils.json_to_sheet(dataList);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "DATA");
+  XLSX.writeFile(wb, "data.xlsx");
+}
 
 // ================= SERVER =================
 async function kirimKeServer(){
+  if(dataList.length === 0){
+    alert("Data kosong");
+    return;
+  }
+
   try{
-    await fetch(`${SERVER_URL}/api/save`,{
+    let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(dataList)
+      body: JSON.stringify(dataList) // 🔥 FIX
     });
 
-    alert("Berhasil kirim");
-  }catch{
-    alert("Gagal kirim");
+    if(!res.ok) throw new Error("Server error");
+
+    dataList.forEach(d => d.server = "✔ terkirim");
+    renderTable();
+
+    alert("Berhasil kirim ke server");
+
+  }catch(err){
+    console.error(err);
+    alert("Gagal kirim ke server");
   }
 }
+
+// ================= AUTO LOAD =================
+window.addEventListener("load", async function(){
+  try{
+    let res = await fetch(`${SERVER_URL}/api/get`);
+
+    if(!res.ok) throw new Error("Server mati");
+
+    let json = await res.json();
+
+    if(json && json.length > 0){
+      dataList = json;
+      dataList.forEach(d => d.server = "✔ dari server");
+      renderTable();
+    }
+
+  }catch(err){
+    console.log("Server belum aktif / kosong");
+  }
+});
