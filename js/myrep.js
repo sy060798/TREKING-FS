@@ -1,3 +1,6 @@
+let chartAmount = null;
+let chartStatus = null;
+let chartAreaStatus = null;
 // ================= GLOBAL =================
 let dataList = [];
 let currentEditId = null;
@@ -73,6 +76,7 @@ function importExcel(e){
         });
       });
       renderTable();
+      loadFilter();
     }catch(err){ console.error(err); alert("Gagal baca file"); }
   };
   reader.readAsBinaryString(file);
@@ -232,6 +236,7 @@ async function kirimKeServer(){
     if(!res.ok) throw new Error("Server error");
     dataList.forEach(d=>d.server="✔ terkirim");
     renderTable();
+    loadFilter();
     alert("Berhasil kirim ke server");
   }catch(err){ console.error(err); alert("Gagal kirim ke server"); }
 }
@@ -267,9 +272,11 @@ function showTab(id){
   document.getElementById(id).classList.add('active');
 }
 // ================= all pivot =================
+// ================= GLOBAL =================
 let chartAmount = null;
 let chartStatus = null;
 let chartAreaStatus = null;
+
 
 // ================= TAB =================
 function showTab(id){
@@ -277,25 +284,65 @@ function showTab(id){
   document.getElementById(id).classList.add('active');
 
   if(id==="pivot"){
-    generatePivot(); // 🔥 auto jalan semua
+    loadFilter(); // isi dropdown
+    setTimeout(()=>{
+      generatePivot(); // render chart
+    },200);
   }
 }
 
+
+// ================= LOAD FILTER =================
+function loadFilter(){
+
+  let areaSet = new Set();
+  let bulanSet = new Set();
+
+  dataList.forEach(d=>{
+    if(!d) return;
+    if(d.area) areaSet.add(d.area);
+    if(d.month) bulanSet.add(d.month);
+  });
+
+  let areaSelect = document.getElementById("filterArea");
+  let bulanSelect = document.getElementById("filterBulan");
+
+  if(!areaSelect || !bulanSelect) return;
+
+  areaSelect.innerHTML = `<option value="">Semua Area</option>`;
+  bulanSelect.innerHTML = `<option value="">Semua Bulan</option>`;
+
+  areaSet.forEach(a=>{
+    areaSelect.innerHTML += `<option value="${a}">${a}</option>`;
+  });
+
+  bulanSet.forEach(b=>{
+    bulanSelect.innerHTML += `<option value="${b}">${b}</option>`;
+  });
+}
+
+
 // ================= PIVOT =================
 function generatePivot(){
+
+  if(!dataList || dataList.length === 0){
+    console.log("Data kosong");
+    return;
+  }
 
   let areaFilter = document.getElementById("filterArea")?.value || "";
   let bulanFilter = document.getElementById("filterBulan")?.value || "";
   let remarkFilter = document.getElementById("filterRemark")?.value || "";
 
   let filteredData = dataList.filter(d=>{
-    return (!areaFilter || d.area===areaFilter) &&
-           (!bulanFilter || d.month===bulanFilter) &&
-           (!remarkFilter || d.remark===remarkFilter);
+    return d &&
+      (!areaFilter || d.area===areaFilter) &&
+      (!bulanFilter || d.month===bulanFilter) &&
+      (!remarkFilter || d.remark===remarkFilter);
   });
 
   // =========================
-  // 1. TOTAL AMOUNT PER AREA
+  // 1. CHART TOTAL AMOUNT
   // =========================
   let areaMap = {};
 
@@ -305,9 +352,12 @@ function generatePivot(){
     areaMap[area] += d.amount || 0;
   });
 
+  let ctx1 = document.getElementById("chartAmount");
+  if(!ctx1) return;
+
   if(chartAmount) chartAmount.destroy();
 
-  chartAmount = new Chart(document.getElementById("chartAmount"), {
+  chartAmount = new Chart(ctx1, {
     type:"bar",
     data:{
       labels:Object.keys(areaMap),
@@ -318,8 +368,9 @@ function generatePivot(){
     }
   });
 
+
   // =========================
-  // 2. PAID vs NOT PAID
+  // 2. CHART PAID vs NOT PAID
   // =========================
   let paid = 0;
   let notPaid = 0;
@@ -332,9 +383,11 @@ function generatePivot(){
     }
   });
 
+  let ctx2 = document.getElementById("chartStatus");
+
   if(chartStatus) chartStatus.destroy();
 
-  chartStatus = new Chart(document.getElementById("chartStatus"), {
+  chartStatus = new Chart(ctx2, {
     type:"pie",
     data:{
       labels:["PAID","NOT PAID"],
@@ -344,8 +397,9 @@ function generatePivot(){
     }
   });
 
+
   // =========================
-  // 3. AREA: PAID vs NOT PAID
+  // 3. CHART AREA STATUS
   // =========================
   let areaStatus = {};
 
@@ -363,9 +417,11 @@ function generatePivot(){
     }
   });
 
+  let ctx3 = document.getElementById("chartAreaStatus");
+
   if(chartAreaStatus) chartAreaStatus.destroy();
 
-  chartAreaStatus = new Chart(document.getElementById("chartAreaStatus"), {
+  chartAreaStatus = new Chart(ctx3, {
     type:"bar",
     data:{
       labels:Object.keys(areaStatus),
@@ -389,11 +445,13 @@ function generatePivot(){
     }
   });
 
+
   // =========================
   // 4. PIVOT TABLE
   // =========================
   renderPivotTable(filteredData);
 }
+
 
 // ================= TABLE =================
 function renderPivotTable(data){
