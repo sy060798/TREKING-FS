@@ -4,7 +4,7 @@ let currentEditId = null;
 let chart = null;
 
 // 🔥 GANTI KE DETA
-const SERVER_URL = "https://namaproject.deta.space";
+const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
 // ================= INIT ==================
 document.addEventListener("DOMContentLoaded", function(){
