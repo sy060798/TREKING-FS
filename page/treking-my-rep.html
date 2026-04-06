@@ -102,6 +102,49 @@ thead th{
   padding:10px;
   border-radius:10px;
 }
+  /* FILTER */
+.filter-box{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+/* GRID CHART */
+.chart-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:20px;
+}
+
+/* CARD CHART */
+.chart-card{
+  background:#1a1a1a;
+  padding:12px;
+  border-radius:12px;
+}
+
+/* CHART FULL WIDTH */
+.chart-card.full{
+  grid-column: span 2;
+}
+
+/* SIZE CHART */
+canvas{
+  width:100% !important;
+  height:250px !important;
+}
+
+/* RESPONSIVE HP */
+@media(max-width:768px){
+  .chart-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card.full{
+    grid-column: span 1;
+  }
+}
 #upload{display:none;}
 </style>
 </head>
@@ -156,8 +199,8 @@ thead th{
 <div id="pivot" class="tab">
 <h3>📈 Pivot Grafik</h3>
 
-<!-- 🔥 FILTER -->
-<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+<!-- FILTER -->
+<div class="filter-box">
   <select id="filterArea" onchange="generatePivot()">
     <option value="">Semua Area</option>
   </select>
@@ -173,15 +216,24 @@ thead th{
   </select>
 </div>
 
-<!-- 🔥 CHART ATAS (2 KIRI KANAN) -->
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-  <canvas id="chartAmount"></canvas>
-  <canvas id="chartStatus"></canvas>
-</div>
+<!-- 🔥 GRID CHART -->
+<div class="chart-grid">
 
-<!-- 🔥 CHART BAWAH (FULL) -->
-<div style="margin-top:20px;">
-  <canvas id="chartAreaStatus"></canvas>
+  <!-- CHART 1 -->
+  <div class="chart-card">
+    <canvas id="chartAmount"></canvas>
+  </div>
+
+  <!-- CHART 2 -->
+  <div class="chart-card">
+    <canvas id="chartStatus"></canvas>
+  </div>
+
+  <!-- CHART 3 FULL -->
+  <div class="chart-card full">
+    <canvas id="chartAreaStatus"></canvas>
+  </div>
+
 </div>
 
 <!-- 🔥 PIVOT TABLE -->
