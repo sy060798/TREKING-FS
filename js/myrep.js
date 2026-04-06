@@ -351,6 +351,98 @@ function formatRupiah(angka){
   return 'Rp ' + Number(angka).toLocaleString('id-ID');
 }
 
+// ================= FORMAT FILTER =================
+function loadFilter(){
+  const areaSet = new Set();
+  const bulanSet = new Set();
+  const remarkSet = new Set();
+
+  dataList.forEach(d => {
+    if(!d) return;
+    if(d.area) areaSet.add(d.area);
+    if(d.month) bulanSet.add(d.month);
+    if(d.remark) remarkSet.add(d.remark);
+  });
+
+  const filterArea = document.getElementById("filterArea");
+  const filterBulan = document.getElementById("filterBulan");
+  const filterRemark = document.getElementById("filterRemark");
+
+  if(filterArea){
+    filterArea.innerHTML = `<option value="">Semua Area</option>` +
+      [...areaSet].map(a => `<option value="${a}">${a}</option>`).join("");
+  }
+
+  if(filterBulan){
+    filterBulan.innerHTML = `<option value="">Semua Bulan</option>` +
+      [...bulanSet].map(b => `<option value="${b}">${b}</option>`).join("");
+  }
+
+  if(filterRemark){
+    filterRemark.innerHTML = `<option value="">Semua Status</option>` +
+      [...remarkSet].map(r => `<option value="${r}">${r}</option>`).join("");
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(
+    e.target.id === "filterArea" ||
+    e.target.id === "filterBulan" ||
+    e.target.id === "filterRemark"
+  ){
+    generatePivot();
+  }
+});
+
+// ================= PIVOT TABEL =================
+
+function renderPivotTable(areaDetail){
+  const tbody = document.querySelector("#pivotTable tbody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if(Object.keys(areaDetail).length === 0){
+    tbody.innerHTML = `<tr><td colspan="5">Tidak ada data</td></tr>`;
+    return;
+  }
+
+  let totalPaid = 0;
+  let totalNotPaid = 0;
+  let totalPaidAmt = 0;
+  let totalNotPaidAmt = 0;
+
+  Object.keys(areaDetail).forEach(area => {
+    const d = areaDetail[area];
+
+    totalPaid += d.paidCount;
+    totalNotPaid += d.notPaidCount;
+    totalPaidAmt += d.paidAmount;
+    totalNotPaidAmt += d.notPaidAmount;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${area}</td>
+      <td>${d.paidCount}</td>
+      <td>${d.notPaidCount}</td>
+      <td>${formatRupiah(d.paidAmount)}</td>
+      <td>${formatRupiah(d.notPaidAmount)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // 🔥 TOTAL ROW
+  const trTotal = document.createElement("tr");
+  trTotal.innerHTML = `
+    <td><b>TOTAL</b></td>
+    <td><b>${totalPaid}</b></td>
+    <td><b>${totalNotPaid}</b></td>
+    <td><b>${formatRupiah(totalPaidAmt)}</b></td>
+    <td><b>${formatRupiah(totalNotPaidAmt)}</b></td>
+  `;
+  tbody.appendChild(trTotal);
+}
+
 // ================= PIVOT =================
 function generatePivot() {
 
@@ -359,6 +451,7 @@ function generatePivot() {
     return;
   }
 
+  // ================= FILTER =================
   const areaFilter = document.getElementById("filterArea")?.value || "";
   const bulanFilter = document.getElementById("filterBulan")?.value || "";
   const remarkFilter = document.getElementById("filterRemark")?.value || "";
@@ -378,28 +471,46 @@ function generatePivot() {
     return;
   }
 
+  // ================= PIVOT =================
   let areaMap = {};
-  let paidCount = 0;
-  let notPaidCount = 0;
-  let paidAmount = 0;
-  let notPaidAmount = 0;
+  let areaDetail = {};
 
   filteredData.forEach(d => {
     const area = d.area || "UNKNOWN";
     const amount = Number(d.amount) || 0;
     const isPaid = (d.remark || "").toUpperCase() === "PAID";
 
+    if (!areaDetail[area]) {
+      areaDetail[area] = {
+        paidCount: 0,
+        notPaidCount: 0,
+        paidAmount: 0,
+        notPaidAmount: 0
+      };
+    }
+
+    // total amount per area (buat chart kiri)
     areaMap[area] = (areaMap[area] || 0) + amount;
 
     if (isPaid) {
-      paidCount++;
-      paidAmount += amount;
+      areaDetail[area].paidCount++;
+      areaDetail[area].paidAmount += amount;
     } else {
-      notPaidCount++;
-      notPaidAmount += amount;
+      areaDetail[area].notPaidCount++;
+      areaDetail[area].notPaidAmount += amount;
     }
   });
 
+  // ================= TOTAL GLOBAL (FIX BUG) =================
+  let paidCount = 0;
+  let notPaidCount = 0;
+
+  Object.values(areaDetail).forEach(d => {
+    paidCount += d.paidCount;
+    notPaidCount += d.notPaidCount;
+  });
+
+  // ================= CHART AMOUNT =================
   if (chartAmount) chartAmount.destroy();
 
   chartAmount = new Chart(ctx1, {
@@ -411,9 +522,16 @@ function generatePivot() {
         data: Object.values(areaMap),
         backgroundColor: "#4f46e5"
       }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      }
     }
   });
 
+  // ================= CHART STATUS =================
   if (chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
@@ -421,16 +539,19 @@ function generatePivot() {
     data: {
       labels: ["PAID", "NOT PAID"],
       datasets: [{
+        label: "Jumlah Data",
         data: [paidCount, notPaidCount],
         backgroundColor: ["#22c55e", "#ef4444"]
       }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
     }
   });
 
-  renderPivotTable(areaMap, {
-    paidCount,
-    notPaidCount,
-    paidAmount,
-    notPaidAmount
-  });
+  // ================= TABLE =================
+  renderPivotTable(areaDetail);
 }
