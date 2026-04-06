@@ -103,37 +103,40 @@ thead th{
   flex-wrap:wrap;
   margin-bottom:15px;
 }
-
+  
 /* GRID CHART */
 .chart-grid{
   display:grid;
   grid-template-columns: repeat(2, 1fr);
-  gap:20px;
+  gap:16px;
+  margin-top:10px;
 }
 
-/* CARD CHART */
+/* CARD */
 .chart-card{
-  background:#1a1a1a;
-  padding:12px;
-  border-radius:12px;
-  box-shadow:0 0 10px rgba(0,0,0,0.5);
-}
-
-/* CHART FULL WIDTH */
-.chart-card.full{
-  grid-column: span 2;
-}
-
-/* SIZE CHART */
-canvas{
-  width:100% !important;
-  height:250px !important;
   background:#1a1a1a;
   padding:10px;
   border-radius:10px;
 }
 
-/* RESPONSIVE HP */
+/* CHART FULL */
+.chart-card.full{
+  grid-column: span 2;
+}
+
+/* SIZE CHART (🔥 INI YANG DIUBAH) */
+canvas{
+  width:100% !important;
+  height:220px !important; /* lebih kecil */
+}
+
+/* 🔥 BIAR ADA JARAK SAMA PINGGIR */
+#pivot{
+  max-width:1100px;
+  margin:auto;
+}
+
+/* 🔥 RESPONSIVE HP */
 @media(max-width:768px){
   .chart-grid{
     grid-template-columns: 1fr;
@@ -141,6 +144,10 @@ canvas{
 
   .chart-card.full{
     grid-column: span 1;
+  }
+
+  canvas{
+    height:200px !important;
   }
 }
 #upload{display:none;}
