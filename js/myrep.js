@@ -47,24 +47,47 @@ document.addEventListener("DOMContentLoaded", function(){
 function importExcel(e){
   let file = e.target.files[0];
   if(!file){ alert("File tidak ada"); return; }
+
   let reader = new FileReader();
+
   reader.onload = function(evt){
     try{
       let wb = XLSX.read(evt.target.result,{type:'binary'});
-      dataList = [];
+
+      let duplicateCount = 0;
+
       wb.SheetNames.forEach(s=>{
         let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
+
         json.forEach(r=>{
+
+          let woBaru = (r.WO || "").toString().trim();
+          let areaBaru = (r.AREA || "").toString().trim();
+          let bulanBaru = (r.MONTH || "").toString().trim();
+
+          // 🔥 CEK DUPLIKAT GLOBAL
+          let sudahAda = dataList.some(d => 
+            (d.wo || "").toString().trim() === woBaru &&
+            (d.area || "").toString().trim() === areaBaru &&
+            (d.month || "").toString().trim() === bulanBaru
+          );
+
+          if(sudahAda){
+            duplicateCount++;
+            return;
+          }
+
           let stb = parseInt(r.STB)||0;
-          let harga = getHarga(r.AREA);
+          let harga = getHarga(areaBaru);
           let dpp = harga + (stb*50000);
+
           dataList.push({
             id: r.ID||Date.now()+Math.random(),
-            wo: r.WO||"",
-            area: r.AREA||"",
+            wo: woBaru,
+            area: areaBaru,
             wotype: r["WO TYPE"]||"",
             tahun: r.TAHUN||"",
-            month: r.MONTH||"",
+            month: bulanBaru,
             tanggal: r.TANGGALPENGERJAAN||"",
             stb: stb,
             dpp: dpp,
@@ -72,15 +95,26 @@ function importExcel(e){
             remark: "NOT PAID",
             server: "-"
           });
+
         });
       });
+
+      // 🔥 NOTIF SEKALI SAJA
+      if(duplicateCount > 0){
+        alert(duplicateCount + " data duplikat tidak dimasukkan");
+      }
+
       renderTable();
       loadFilter();
-    }catch(err){ console.error(err); alert("Gagal baca file"); }
+
+    }catch(err){
+      console.error(err);
+      alert("Gagal baca file");
+    }
   };
+
   reader.readAsBinaryString(file);
 }
-
 // ================= RENDER =================
 function renderTable(){
   let tbody = document.querySelector("#tableData tbody");
