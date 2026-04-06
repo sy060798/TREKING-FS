@@ -211,6 +211,33 @@ td, th{
   border-radius:10px;
 }
 
+/* ==================== TAB ==================== */
+.tab{
+  display:none;
+}
+.tab.active{
+  display:block;
+}
+
+/* MENU BUTTONS */
+.menu button{
+  padding:8px 16px;
+  margin-right:6px;
+  border:none;
+  border-radius:6px;
+  background:#333;
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+.menu button:hover{
+  background:#4f46e5;
+}
+.menu button.active{
+  background:#4f46e5;
+  font-weight:bold;
+}
+
 /* ==================== RESPONSIVE HP ==================== */
 @media(max-width:768px){
   .chart-grid{
@@ -229,6 +256,11 @@ td, th{
   .table-body{
     max-height:180px; /* lebih pas di HP */
   }
+
+  .menu button{
+    padding:6px 12px;
+    margin-right:4px;
+  }
 }
 #upload{display:none;}
 </style>
@@ -238,22 +270,24 @@ td, th{
 
 <h2>📊 TREKING MY REP</h2>
 
+<!-- MENU TAB -->
 <div class="menu">
-<button onclick="showTab('data')">📋 Data</button>
-<button onclick="showTab('pivot')">📈 Pivot</button>
+  <button onclick="showTab('data')" class="active">📋 Data</button>
+  <button onclick="showTab('pivot')">📈 Pivot</button>
 </div>
 
+<!-- BUTTON GROUP -->
 <div class="btn-group">
-<button class="blue" onclick="exportExcel()">⬇ Download</button>
-<button class="orange" onclick="triggerUpload()">⬆ Upload</button>
-<button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
-<button class="orange" onclick="editMassal()">✏ Edit Massal</button>
-<button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
+  <button class="blue" onclick="exportExcel()">⬇ Download</button>
+  <button class="orange" onclick="triggerUpload()">⬆ Upload</button>
+  <button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
+  <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
+  <button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
 
-<input type="file" id="upload" accept=".xlsx,.xls">
+  <input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
-<!-- ================= TAB DATA ================= -->
+<!-- TAB DATA -->
 <div id="data" class="tab active">
   <div class="table-wrap">
     <table id="tableData">
@@ -280,7 +314,7 @@ td, th{
   </div>
 </div>
 
-<!-- ================= TAB PIVOT ================= -->
+<!-- TAB PIVOT -->
 <div id="pivot" class="tab">
   <h3>📈 Pivot Grafik</h3>
 
@@ -303,29 +337,20 @@ td, th{
 
   <!-- GRID CHART -->
   <div class="chart-grid">
-
-    <!-- CHART 1: TOTAL AMOUNT -->
     <div class="chart-card">
       <canvas id="chartAmount"></canvas>
     </div>
-
-    <!-- CHART 2: PAID vs NOT PAID -->
     <div class="chart-card">
       <canvas id="chartStatus"></canvas>
     </div>
-
-    <!-- CHART 3: AREA STATUS (STACKED) FULL WIDTH -->
     <div class="chart-card full">
       <canvas id="chartAreaStatus"></canvas>
     </div>
-
   </div>
 
-  <!-- ================= PIVOT TABLE ================= -->
+  <!-- PIVOT TABLE -->
   <h3 style="margin-top:20px;">📋 Pivot Table</h3>
   <div class="table-wrapper">
-
-    <!-- HEADER TABLE -->
     <table>
       <thead>
         <tr>
@@ -339,20 +364,17 @@ td, th{
       </thead>
     </table>
 
-    <!-- BODY TABLE (scrollable) -->
     <div class="table-body">
       <table>
         <tbody id="pivotBody"></tbody>
       </table>
     </div>
 
-    <!-- TOTAL ROW (fix) -->
     <table>
       <tbody>
         <tr class="total-row" id="pivotTotal"></tr>
       </tbody>
     </table>
-
   </div>
 </div>
 
