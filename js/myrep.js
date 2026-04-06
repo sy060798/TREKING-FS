@@ -1,6 +1,3 @@
-let chartAmount = null;
-let chartStatus = null;
-let chartAreaStatus = null;
 // ================= GLOBAL =================
 let dataList = [];
 let currentEditId = null;
