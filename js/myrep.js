@@ -3,7 +3,7 @@ let dataList = [];
 let currentEditId = null;
 let chart = null;
 
-// 🔥 GANTI KE DETA
+// 🔥 SERVER URL
 const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
 // ================= INIT ==================
@@ -65,19 +65,23 @@ function importExcel(e){
       wb.SheetNames.forEach(s => {
         let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
         json.forEach(r => {
-          let stb = parseInt(r.STB) || 0;
-          let dpp = 200000 + stb * 50000;
 
-       dataList.push({
-  id: r.ID || Date.now()+Math.random(),
-  wo: r.WO || "",
-  area: r.AREA || "",
-  wotype: r["WO TYPE"] || "",
-  tahun: r.TAHUN || "",
-  month: r.MONTH || "",
-  tanggal: r.TANGGALPENGERJAAN || "",
-  server: "-"
+          dataList.push({
+            id: r.ID || Date.now()+Math.random(),
+            wo: r.WO || "",
+            area: r.AREA || "",
+            wotype: r["WO TYPE"] || "",
+            tahun: r.TAHUN || "",
+            month: r.MONTH || "",
+            tanggal: r.TANGGALPENGERJAAN || "",
+
+            // 🔥 FIX: BALIKIN INI
+            stb: parseInt(r.STB) || 0,
+            remark: r.REMARK || "NOT PAID",
+
+            server: "-"
           });
+
         });
       });
 
@@ -113,6 +117,11 @@ function renderTable(){
       <td>${d.tahun}</td>
       <td>${d.month}</td>
       <td>${d.tanggal}</td>
+
+      <!-- 🔥 TAMBAHAN -->
+      <td>${d.stb}</td>
+      <td>${d.remark}</td>
+
       <td>${d.server || "-"}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
@@ -158,8 +167,6 @@ function saveEdit(){
     d.wo = edit_wo.value;
     d.area = edit_area.value;
     d.stb = parseInt(edit_stb.value) || 0;
-    d.dpp = 200000 + d.stb * 50000;
-    d.amount = Math.round(d.dpp * 1.11);
     d.remark = edit_remark.value;
   }
   renderTable();
@@ -198,15 +205,8 @@ async function kirimKeServer(){
     let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        id: d.id,
-        wo: d.wo,
-        area: d.area,
-        wotype: d.wotype,
-        tahun: d.tahun,
-        month: d.month,
-        tanggal: d.tanggal
-})
+      body: JSON.stringify(dataList) // 🔥 FIX DI SINI
+    });
 
     if(!res.ok) throw new Error("Server error");
 
@@ -244,4 +244,4 @@ window.addEventListener("load", async function(){
 });
 
 // ================= PIVOT =================
-// (TIDAK DIUBAH - tetap sama persis)
+// (TIDAK DIUBAH)
