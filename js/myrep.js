@@ -17,6 +17,27 @@ function getHarga(area){
   return 200000;
 }
 
+
+// ==================== TAB SWITCH ====================
+function showTab(tabId) {
+  // Hapus class active dari semua tab
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  // Tambah class active ke tab yang dipilih
+  const target = document.getElementById(tabId);
+  if(target) target.classList.add('active');
+
+  // Opsional: highlight tombol menu
+  document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+  const btn = document.querySelector(`.menu button[onclick="showTab('${tabId}')"]`);
+  if(btn) btn.classList.add('active');
+}
+
+// ==================== INIT TAB DEFAULT ====================
+document.addEventListener("DOMContentLoaded", function(){
+  // set default tab Data
+  showTab('data');
+});
+
 // ================= INIT ==================
 document.addEventListener("DOMContentLoaded", function(){
   window.edit_wo = document.getElementById("edit_wo");
