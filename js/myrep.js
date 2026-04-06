@@ -20,16 +20,37 @@ function getHarga(area){
 
 // ==================== TAB SWITCH ====================
 function showTab(tabId) {
-  // Hapus class active dari semua tab
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  // Tambah class active ke tab yang dipilih
-  const target = document.getElementById(tabId);
-  if(target) target.classList.add('active');
+  // Hapus semua tab aktif
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
 
-  // Opsional: highlight tombol menu
-  document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+  // Tampilkan tab yang dipilih
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+
+  // Highlight tombol menu
+  document.querySelectorAll('.menu button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
   const btn = document.querySelector(`.menu button[onclick="showTab('${tabId}')"]`);
-  if(btn) btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  // 🔥 FIX PENTING UNTUK PIVOT
+  if (tabId === "pivot") {
+    // Load dropdown filter dulu
+    if (typeof loadFilter === "function") {
+      loadFilter();
+    }
+
+    // Delay supaya canvas sudah tampil (Chart.js butuh ini)
+    setTimeout(() => {
+      if (typeof generatePivot === "function") {
+        generatePivot();
+      }
+    }, 200);
+  }
 }
 
 // ==================== INIT TAB DEFAULT ====================
