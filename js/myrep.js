@@ -260,6 +260,7 @@ window.addEventListener("load",async function(){
 
       dataList.forEach(d=>d.server="✔ dari server");
       renderTable();
+      loadFilter();
     }
 
   }catch(err){ console.log("Server belum aktif / kosong"); }
@@ -267,26 +268,17 @@ window.addEventListener("load",async function(){
 
 // ================= TAMBAHAN =================
 function triggerUpload(){ document.getElementById('upload').click(); }
-function showTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+
 // ================= all pivot =================
-// ================= GLOBAL =================
-let chartAmount = null;
-let chartStatus = null;
-let chartAreaStatus = null;
 
-
-// ================= TAB =================
 function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
   if(id==="pivot"){
-    loadFilter(); // isi dropdown
+    loadFilter();
     setTimeout(()=>{
-      generatePivot(); // render chart
+      generatePivot();
     },200);
   }
 }
