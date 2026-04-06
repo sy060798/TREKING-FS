@@ -161,6 +161,56 @@ canvas{
   padding: 0 12px; /* biar nggak mepet kiri-kanan */
 }
 
+/* ==================== PIVOT TABLE ==================== */
+.table-wrapper{
+  max-width: 1100px;
+  margin:auto;
+  background:#1e1e1e;
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+/* HEADER TABLE */
+.table-wrapper thead{
+  background:#6d28d9;
+  color:white;
+}
+
+/* BODY TABLE SCROLL */
+.table-body{
+  max-height:220px; /* kira2 5 row */
+  overflow-y:auto;
+}
+
+/* TABLE BIASA */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+td, th{
+  padding:10px;
+  text-align:center;
+  border-bottom:1px solid #333;
+}
+
+/* TOTAL ROW FIX */
+.total-row{
+  background:#2a2a2a;
+  font-weight:bold;
+  color:#22c55e;
+}
+
+/* SCROLLBAR CUSTOM */
+.table-body::-webkit-scrollbar{
+  width:6px;
+}
+.table-body::-webkit-scrollbar-thumb{
+  background:#555;
+  border-radius:10px;
+}
+
 /* ==================== RESPONSIVE HP ==================== */
 @media(max-width:768px){
   .chart-grid{
@@ -174,6 +224,10 @@ canvas{
 
   canvas{
     height: 220px !important; /* lebih pas di layar kecil */
+  }
+
+  .table-body{
+    max-height:180px; /* lebih pas di HP */
   }
 }
 #upload{display:none;}
@@ -199,34 +253,34 @@ canvas{
 <input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
-<!-- TAB DATA -->
+<!-- ================= TAB DATA ================= -->
 <div id="data" class="tab active">
-<div class="table-wrap">
-<table id="tableData">
-<thead>
-<tr>
-<th>No</th>
-<th><input type="checkbox" id="checkAll"></th>
-<th>ID</th>
-<th>WO</th>
-<th>Tanggal</th>
-<th>Bulan</th>
-<th>Area</th>
-<th>WO Type</th>
-<th>STB</th>
-<th>DPP</th>
-<th>Amount</th>
-<th>Remark</th>
-<th>Server</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
+  <div class="table-wrap">
+    <table id="tableData">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th><input type="checkbox" id="checkAll"></th>
+          <th>ID</th>
+          <th>WO</th>
+          <th>Tanggal</th>
+          <th>Bulan</th>
+          <th>Area</th>
+          <th>WO Type</th>
+          <th>STB</th>
+          <th>DPP</th>
+          <th>Amount</th>
+          <th>Remark</th>
+          <th>Server</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
-<!-- TAB PIVOT -->
+<!-- ================= TAB PIVOT ================= -->
 <div id="pivot" class="tab">
   <h3>📈 Pivot Grafik</h3>
 
@@ -267,19 +321,38 @@ canvas{
 
   </div>
 
-  <!-- PIVOT TABLE -->
+  <!-- ================= PIVOT TABLE ================= -->
   <h3 style="margin-top:20px;">📋 Pivot Table</h3>
-  <div class="table-wrap">
-    <table id="pivotTable">
+  <div class="table-wrapper">
+
+    <!-- HEADER TABLE -->
+    <table>
       <thead>
         <tr>
           <th>Area</th>
-          <th>Total STB</th>
-          <th>Total Amount</th>
+          <th>Paid (Count)</th>
+          <th>Not Paid (Count)</th>
+          <th>Paid (Rp)</th>
+          <th>Not Paid (Rp)</th>
+          <th>Total</th>
         </tr>
       </thead>
-      <tbody></tbody>
     </table>
+
+    <!-- BODY TABLE (scrollable) -->
+    <div class="table-body">
+      <table>
+        <tbody id="pivotBody"></tbody>
+      </table>
+    </div>
+
+    <!-- TOTAL ROW (fix) -->
+    <table>
+      <tbody>
+        <tr class="total-row" id="pivotTotal"></tr>
+      </tbody>
+    </table>
+
   </div>
 </div>
 
