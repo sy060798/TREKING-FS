@@ -333,83 +333,11 @@ function formatRupiah(angka){
 // ================= PIVOT =================
 function generatePivot() {
 
-// ==================== LOAD FILTER ====================
-function loadFilter(){
-  const areaSel = document.getElementById("filterArea");
-  const bulanSel = document.getElementById("filterBulan");
-  if(!areaSel || !bulanSel) return;
-
-  // Ambil nilai unik dari dataList
-  const areas = [...new Set(dataList.map(d=>d.area).filter(Boolean))];
-  const months = [...new Set(dataList.map(d=>d.month).filter(Boolean))];
-
-  // Reset options
-  areaSel.innerHTML = `<option value="">Semua Area</option>`;
-  bulanSel.innerHTML = `<option value="">Semua Bulan</option>`;
-
-  areas.forEach(a=>{
-    let opt = document.createElement("option");
-    opt.value = a;
-    opt.textContent = a;
-    areaSel.appendChild(opt);
-  });
-
-  months.forEach(m=>{
-    let opt = document.createElement("option");
-    opt.value = m;
-    opt.textContent = m;
-    bulanSel.appendChild(opt);
-  });
-}
-
-// ==================== RENDER PIVOT TABLE ====================
-function renderPivotTable(areaMap, totals){
-  const tbody = document.getElementById("pivotBody");
-  const totalRow = document.getElementById("pivotTotal");
-  if(!tbody || !totalRow) return;
-
-  tbody.innerHTML = "";
-
-  Object.keys(areaMap).forEach(area=>{
-    let paidCount=0, notPaidCount=0, paidAmount=0, notPaidAmount=0;
-
-    dataList.forEach(d=>{
-      if(d.area !== area) return;
-      if((d.remark||"").toUpperCase()==="PAID"){
-        paidCount++; paidAmount += Number(d.amount)||0;
-      } else {
-        notPaidCount++; notPaidAmount += Number(d.amount)||0;
-      }
-    });
-
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${area}</td>
-      <td>${paidCount}</td>
-      <td>${notPaidCount}</td>
-      <td>${formatRupiah(paidAmount)}</td>
-      <td>${formatRupiah(notPaidAmount)}</td>
-      <td>${formatRupiah(paidAmount + notPaidAmount)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  totalRow.innerHTML = `
-    <td>Total</td>
-    <td>${totals.paidCount}</td>
-    <td>${totals.notPaidCount}</td>
-    <td>${formatRupiah(totals.paidAmount)}</td>
-    <td>${formatRupiah(totals.notPaidAmount)}</td>
-    <td>${formatRupiah(totals.paidAmount + totals.notPaidAmount)}</td>
-  `;
-}
-  
   if (!Array.isArray(dataList) || dataList.length === 0) {
     console.log("Data kosong");
     return;
   }
 
-  // 🔥 FILTER
   const areaFilter = document.getElementById("filterArea")?.value || "";
   const bulanFilter = document.getElementById("filterBulan")?.value || "";
   const remarkFilter = document.getElementById("filterRemark")?.value || "";
@@ -421,7 +349,6 @@ function renderPivotTable(areaMap, totals){
     (!remarkFilter || d.remark === remarkFilter)
   );
 
-  // 🔥 CEK CANVAS
   const ctx1 = document.getElementById("chartAmount");
   const ctx2 = document.getElementById("chartStatus");
 
@@ -430,9 +357,6 @@ function renderPivotTable(areaMap, totals){
     return;
   }
 
-  // =========================
-  // 🔥 HITUNG SEMUA (COUNT + AMOUNT)
-  // =========================
   let areaMap = {};
   let paidCount = 0;
   let notPaidCount = 0;
@@ -444,10 +368,8 @@ function renderPivotTable(areaMap, totals){
     const amount = Number(d.amount) || 0;
     const isPaid = (d.remark || "").toUpperCase() === "PAID";
 
-    // TOTAL AMOUNT PER AREA
     areaMap[area] = (areaMap[area] || 0) + amount;
 
-    // GLOBAL
     if (isPaid) {
       paidCount++;
       paidAmount += amount;
@@ -457,9 +379,6 @@ function renderPivotTable(areaMap, totals){
     }
   });
 
-  // =========================
-  // 1. CHART TOTAL AMOUNT
-  // =========================
   if (chartAmount) chartAmount.destroy();
 
   chartAmount = new Chart(ctx1, {
@@ -471,16 +390,9 @@ function renderPivotTable(areaMap, totals){
         data: Object.values(areaMap),
         backgroundColor: "#4f46e5"
       }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
     }
   });
 
-  // =========================
-  // 2. STATUS (COUNT) → BAR
-  // =========================
   if (chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
@@ -488,28 +400,12 @@ function renderPivotTable(areaMap, totals){
     data: {
       labels: ["PAID", "NOT PAID"],
       datasets: [{
-        label: "Jumlah Data",
         data: [paidCount, notPaidCount],
         backgroundColor: ["#22c55e", "#ef4444"]
       }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `Count: ${ctx.raw}`
-          }
-        }
-      }
     }
   });
 
-  // =========================
-  // 🔥 KIRIM KE TABLE
-  // =========================
   renderPivotTable(areaMap, {
     paidCount,
     notPaidCount,
