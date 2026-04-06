@@ -100,8 +100,8 @@ function renderTable(){
       <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.id}</td>
       <td>${d.wo}</td>
-      <td>${formatTanggalExcel(d.tanggal)}</td>   <!-- 🔥 TAMBAHAN -->
-      <td>${d.month || "-"}</td>     <!-- 🔥 TAMBAHAN -->
+      <td>${formatTanggalExcel(d.tanggal)}</td>
+      <td>${d.month || "-"}</td>
       <td>${d.area}</td>
       <td>${d.wotype}</td>
       <td>${d.stb}</td>
