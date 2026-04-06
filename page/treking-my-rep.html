@@ -149,6 +149,7 @@ thead th{
 <!-- TAB PIVOT -->
 <div id="pivot" class="tab">
 <h3>📈 Pivot Grafik</h3>
+
 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
   <select id="filterArea" onchange="generatePivot()">
     <option value="">Semua Area</option>
@@ -162,10 +163,28 @@ thead th{
     <option value="NOT PAID">NOT PAID</option>
   </select>
 </div>
+
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
   <canvas id="chartAmount"></canvas>
   <canvas id="chartStatus"></canvas>
 </div>
+
+<!-- 🔥 TAMBAHKAN DI SINI -->
+<h3 style="margin-top:20px;">📋 Pivot Table</h3>
+
+<div class="table-wrap">
+<table id="pivotTable">
+<thead>
+<tr>
+<th>Area</th>
+<th>Total STB</th>
+<th>Total Amount</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
 </div>
 
 <!-- MODAL EDIT -->
