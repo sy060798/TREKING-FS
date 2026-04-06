@@ -266,3 +266,162 @@ function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+// ================= all pivot =================
+let chartAmount = null;
+let chartStatus = null;
+let chartAreaStatus = null;
+
+// ================= TAB =================
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  if(id==="pivot"){
+    generatePivot(); // 🔥 auto jalan semua
+  }
+}
+
+// ================= PIVOT =================
+function generatePivot(){
+
+  let areaFilter = document.getElementById("filterArea")?.value || "";
+  let bulanFilter = document.getElementById("filterBulan")?.value || "";
+  let remarkFilter = document.getElementById("filterRemark")?.value || "";
+
+  let filteredData = dataList.filter(d=>{
+    return (!areaFilter || d.area===areaFilter) &&
+           (!bulanFilter || d.month===bulanFilter) &&
+           (!remarkFilter || d.remark===remarkFilter);
+  });
+
+  // =========================
+  // 1. TOTAL AMOUNT PER AREA
+  // =========================
+  let areaMap = {};
+
+  filteredData.forEach(d=>{
+    let area = d.area || "UNKNOWN";
+    if(!areaMap[area]) areaMap[area] = 0;
+    areaMap[area] += d.amount || 0;
+  });
+
+  if(chartAmount) chartAmount.destroy();
+
+  chartAmount = new Chart(document.getElementById("chartAmount"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(areaMap),
+      datasets:[{
+        label:"Total Amount",
+        data:Object.values(areaMap)
+      }]
+    }
+  });
+
+  // =========================
+  // 2. PAID vs NOT PAID
+  // =========================
+  let paid = 0;
+  let notPaid = 0;
+
+  filteredData.forEach(d=>{
+    if((d.remark || "").toUpperCase() === "PAID"){
+      paid += d.amount || 0;
+    } else {
+      notPaid += d.amount || 0;
+    }
+  });
+
+  if(chartStatus) chartStatus.destroy();
+
+  chartStatus = new Chart(document.getElementById("chartStatus"), {
+    type:"pie",
+    data:{
+      labels:["PAID","NOT PAID"],
+      datasets:[{
+        data:[paid, notPaid]
+      }]
+    }
+  });
+
+  // =========================
+  // 3. AREA: PAID vs NOT PAID
+  // =========================
+  let areaStatus = {};
+
+  filteredData.forEach(d=>{
+    let area = d.area || "UNKNOWN";
+
+    if(!areaStatus[area]){
+      areaStatus[area] = { paid:0, notPaid:0 };
+    }
+
+    if((d.remark || "").toUpperCase() === "PAID"){
+      areaStatus[area].paid += d.amount || 0;
+    } else {
+      areaStatus[area].notPaid += d.amount || 0;
+    }
+  });
+
+  if(chartAreaStatus) chartAreaStatus.destroy();
+
+  chartAreaStatus = new Chart(document.getElementById("chartAreaStatus"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(areaStatus),
+      datasets:[
+        {
+          label:"PAID",
+          data:Object.values(areaStatus).map(v=>v.paid)
+        },
+        {
+          label:"NOT PAID",
+          data:Object.values(areaStatus).map(v=>v.notPaid)
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      scales:{
+        x:{ stacked:true },
+        y:{ stacked:true }
+      }
+    }
+  });
+
+  // =========================
+  // 4. PIVOT TABLE
+  // =========================
+  renderPivotTable(filteredData);
+}
+
+// ================= TABLE =================
+function renderPivotTable(data){
+  let tbody = document.querySelector("#pivotTable tbody");
+  if(!tbody) return;
+
+  tbody.innerHTML = "";
+
+  let pivot = {};
+
+  data.forEach(d=>{
+    let area = d.area || "UNKNOWN";
+
+    if(!pivot[area]){
+      pivot[area] = { stb:0, amount:0 };
+    }
+
+    pivot[area].stb += d.stb || 0;
+    pivot[area].amount += d.amount || 0;
+  });
+
+  Object.keys(pivot).forEach(area=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${area}</td>
+      <td>${pivot[area].stb}</td>
+      <td>${pivot[area].amount}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
