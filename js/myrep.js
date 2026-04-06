@@ -1,28 +1,27 @@
 // ================= GLOBAL =================
 let dataList = [];
 let currentEditId = null;
-let chart = null;
 
 // 🔥 SERVER
 const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
-// 🔥 HARGA PER AREA
+// ================= HARGA AREA =================
 function getHarga(area){
   if(!area) return 200000;
 
-  area = area.toLowerCase();
+  let a = area.toLowerCase();
 
-  if(area.includes("purwakarta")) return 280000;
-  if(area.includes("sidoarjo")) return 280000;
-  if(area.includes("surabaya")) return 280000;
-  if(area.includes("pamatang siantar")) return 245000;
-  if(area.includes("deli serdang")) return 260000;
-  if(area.includes("south fo")) return 300000;
+  if(a.includes("purwakarta")) return 280000;
+  if(a.includes("sidoarjo")) return 280000;
+  if(a.includes("surabaya")) return 280000;
+  if(a.includes("pamatang siantar")) return 245000;
+  if(a.includes("deli serdang")) return 260000;
+  if(a.includes("south fo")) return 300000;
 
-  return 200000; // default
+  return 200000;
 }
 
-// ================= INIT ==================
+// ================= INIT =================
 document.addEventListener("DOMContentLoaded", function(){
 
   window.edit_wo = document.getElementById("edit_wo");
@@ -33,16 +32,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
   let upload = document.getElementById("upload");
   if(upload){
-    upload.addEventListener("click", ()=>upload.value = null);
     upload.addEventListener("change", importExcel);
-  }
-
-  let checkAll = document.getElementById("checkAll");
-  if(checkAll){
-    checkAll.addEventListener("change", function(e){
-      document.querySelectorAll("#tableData tbody input[type=checkbox]")
-      .forEach(c => c.checked = e.target.checked);
-    });
   }
 
 });
@@ -67,17 +57,13 @@ function importExcel(e){
 
         json.forEach(r => {
 
-          // 🔥 STB
           let stb = parseInt(r.STB) || 0;
 
-          // 🔥 HARGA AREA
           let harga = getHarga(r.AREA);
-
-          // 🔥 DPP = harga + tambahan STB
           let dpp = harga + (stb * 50000);
 
           dataList.push({
-            id: r.ID || Date.now()+Math.random(),
+            id: r.ID || Date.now(),
             wo: r.WO || "",
             area: r.AREA || "",
             wotype: r["WO TYPE"] || "",
@@ -86,11 +72,10 @@ function importExcel(e){
             month: r.MONTH || "",
             tanggal: r.TANGGALPENGERJAAN || "",
 
-            // 🔥 SISTEM LAMA
             stb: stb,
             dpp: dpp,
             amount: Math.round(dpp * 1.11),
-            remark: r.REMARK || "NOT PAID",
+            remark: "NOT PAID",
 
             server: "-"
           });
@@ -101,7 +86,6 @@ function importExcel(e){
       renderTable();
 
     }catch(err){
-      console.error(err);
       alert("Gagal baca file");
     }
   };
@@ -116,16 +100,11 @@ function renderTable(){
 
   tbody.innerHTML = "";
 
-  if(dataList.length === 0){
-    tbody.innerHTML = `<tr><td colspan="12">Tidak ada data</td></tr>`;
-    return;
-  }
-
   dataList.forEach((d,i)=>{
     let tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${i+1}</td>
-      <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.id}</td>
       <td>${d.wo}</td>
       <td>${d.area}</td>
@@ -134,9 +113,9 @@ function renderTable(){
       <td>${d.dpp}</td>
       <td>${d.amount}</td>
       <td>${d.remark}</td>
-      <td>${d.server || "-"}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
+
     tbody.appendChild(tr);
   });
 }
@@ -144,6 +123,7 @@ function renderTable(){
 // ================= EDIT =================
 function editData(id){
   currentEditId = id;
+
   let d = dataList.find(x => String(x.id) === String(id));
   if(!d) return;
 
@@ -151,7 +131,8 @@ function editData(id){
   edit_area.value = d.area;
   edit_stb.value = d.stb;
   edit_remark.value = d.remark;
-  modalEdit.style.display = "flex";
+
+  modalEdit.style.display = "block";
 }
 
 // ================= SAVE =================
@@ -161,11 +142,8 @@ function saveEdit(){
 
   d.wo = edit_wo.value;
   d.area = edit_area.value;
-
-  // 🔥 STB bisa ketik angka bebas
   d.stb = parseInt(edit_stb.value) || 0;
 
-  // 🔥 hitung ulang harga
   let harga = getHarga(d.area);
   d.dpp = harga + (d.stb * 50000);
   d.amount = Math.round(d.dpp * 1.11);
@@ -176,54 +154,25 @@ function saveEdit(){
   closeModal();
 }
 
-// ================= CLOSE MODAL =================
+// ================= CLOSE =================
 function closeModal(){
-  if(modalEdit){
-    modalEdit.style.display = "none";
-  }
+  modalEdit.style.display = "none";
   currentEditId = null;
 }
 
-// klik luar modal
-window.onclick = function(e){
-  if(e.target === modalEdit){
-    closeModal();
-  }
-}
-
-// ================= HAPUS =================
-function hapusTerpilih(){
-  let ids = [...document.querySelectorAll("#tableData tbody input:checked")]
-    .map(c => String(c.dataset.id));
-
-  dataList = dataList.filter(d => !ids.includes(String(d.id)));
-
-  renderTable();
-}
+// ❌ HAPUS window.onclick (ini penyebab tombol mati)
 
 // ================= SERVER =================
 async function kirimKeServer(){
-  if(dataList.length === 0){
-    alert("Data kosong");
-    return;
-  }
-
   try{
-    let res = await fetch(`${SERVER_URL}/api/save`,{
+    await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(dataList)
     });
 
-    if(!res.ok) throw new Error("Server error");
-
-    dataList.forEach(d => d.server = "✔ terkirim");
-    renderTable();
-
-    alert("Berhasil kirim ke server");
-
-  }catch(err){
-    console.error(err);
-    alert("Gagal kirim ke server");
+    alert("Berhasil kirim");
+  }catch{
+    alert("Gagal kirim");
   }
 }
