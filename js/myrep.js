@@ -397,13 +397,16 @@ document.addEventListener("change", function(e){
 // ================= PIVOT TABEL =================
 
 function renderPivotTable(areaDetail){
-  const tbody = document.querySelector("#pivotTable tbody");
-  if(!tbody) return;
+  const tbody = document.getElementById("pivotBody");
+  const totalRow = document.getElementById("pivotTotal");
+
+  if(!tbody || !totalRow) return;
 
   tbody.innerHTML = "";
+  totalRow.innerHTML = "";
 
   if(Object.keys(areaDetail).length === 0){
-    tbody.innerHTML = `<tr><td colspan="5">Tidak ada data</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6">Tidak ada data</td></tr>`;
     return;
   }
 
@@ -414,6 +417,7 @@ function renderPivotTable(areaDetail){
 
   Object.keys(areaDetail).forEach(area => {
     const d = areaDetail[area];
+    const total = d.paidAmount + d.notPaidAmount;
 
     totalPaid += d.paidCount;
     totalNotPaid += d.notPaidCount;
@@ -427,20 +431,20 @@ function renderPivotTable(areaDetail){
       <td>${d.notPaidCount}</td>
       <td>${formatRupiah(d.paidAmount)}</td>
       <td>${formatRupiah(d.notPaidAmount)}</td>
+      <td>${formatRupiah(total)}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // ✅ BARIS TOTAL (FIX)
-  const trTotal = document.createElement("tr");
-  trTotal.innerHTML = `
+  // ✅ TOTAL MASUK FOOTER (FIX SESUAI HTML)
+  totalRow.innerHTML = `
     <td><b>TOTAL</b></td>
     <td><b>${totalPaid}</b></td>
     <td><b>${totalNotPaid}</b></td>
     <td><b>${formatRupiah(totalPaidAmt)}</b></td>
     <td><b>${formatRupiah(totalNotPaidAmt)}</b></td>
+    <td><b>${formatRupiah(totalPaidAmt + totalNotPaidAmt)}</b></td>
   `;
-  tbody.appendChild(trTotal);
 }
 // ================= PIVOT =================
 function generatePivot() {
