@@ -68,16 +68,15 @@ function importExcel(e){
           let stb = parseInt(r.STB) || 0;
           let dpp = 200000 + stb * 50000;
 
-          dataList.push({
-            id: r.ID || Date.now()+Math.random(),
-            wo: r.WO || "",
-            area: r.AREA || "",
-            wotype: r["WO TYPE"] || "",
-            stb: stb,
-            dpp: dpp,
-            amount: Math.round(dpp * 1.11),
-            remark: r.REMARK || "NOT PAID",
-            server: "-"
+       dataList.push({
+  id: r.ID || Date.now()+Math.random(),
+  wo: r.WO || "",
+  area: r.AREA || "",
+  wotype: r["WO TYPE"] || "",
+  tahun: r.TAHUN || "",
+  month: r.MONTH || "",
+  tanggal: r.TANGGALPENGERJAAN || "",
+  server: "-"
           });
         });
       });
@@ -110,14 +109,10 @@ function renderTable(){
     tr.innerHTML = `
       <td>${i+1}</td>
       <td><input type="checkbox" data-id="${d.id}"></td>
-      <td>${d.id}</td>
-      <td>${d.wo}</td>
-      <td>${d.area}</td>
       <td>${d.wotype}</td>
-      <td>${d.stb}</td>
-      <td>${d.dpp}</td>
-      <td>${d.amount}</td>
-      <td>${d.remark}</td>
+      <td>${d.tahun}</td>
+      <td>${d.month}</td>
+      <td>${d.tanggal}</td>
       <td>${d.server || "-"}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
@@ -203,8 +198,15 @@ async function kirimKeServer(){
     let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(dataList)
-    });
+      body: JSON.stringify({
+        id: d.id,
+        wo: d.wo,
+        area: d.area,
+        wotype: d.wotype,
+        tahun: d.tahun,
+        month: d.month,
+        tanggal: d.tanggal
+})
 
     if(!res.ok) throw new Error("Server error");
 
