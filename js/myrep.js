@@ -4,7 +4,6 @@ let chartAreaStatus = null;
 // ================= GLOBAL =================
 let dataList = [];
 let currentEditId = null;
-let chart = null;
 
 const SERVER_URL = "https://tracking-server-production-6a12.up.railway.app";
 
@@ -317,21 +316,34 @@ function loadFilter(){
 // ================= PIVOT =================
 function generatePivot(){
 
-  if(!dataList || dataList.length === 0){
+  // 🔥 VALIDASI DATA
+  if(!Array.isArray(dataList) || dataList.length === 0){
     console.log("Data kosong");
     return;
   }
 
+  // 🔥 AMBIL FILTER
   let areaFilter = document.getElementById("filterArea")?.value || "";
   let bulanFilter = document.getElementById("filterBulan")?.value || "";
   let remarkFilter = document.getElementById("filterRemark")?.value || "";
 
+  // 🔥 FILTER DATA
   let filteredData = dataList.filter(d=>{
     return d &&
       (!areaFilter || d.area===areaFilter) &&
       (!bulanFilter || d.month===bulanFilter) &&
       (!remarkFilter || d.remark===remarkFilter);
   });
+
+  // 🔥 CEK CANVAS (WAJIB)
+  let ctx1 = document.getElementById("chartAmount");
+  let ctx2 = document.getElementById("chartStatus");
+  let ctx3 = document.getElementById("chartAreaStatus");
+
+  if(!ctx1 || !ctx2 || !ctx3){
+    console.log("Canvas belum siap");
+    return;
+  }
 
   // =========================
   // 1. CHART TOTAL AMOUNT
@@ -343,9 +355,6 @@ function generatePivot(){
     if(!areaMap[area]) areaMap[area] = 0;
     areaMap[area] += d.amount || 0;
   });
-
-  let ctx1 = document.getElementById("chartAmount");
-  if(!ctx1) return;
 
   if(chartAmount) chartAmount.destroy();
 
@@ -375,8 +384,6 @@ function generatePivot(){
     }
   });
 
-  let ctx2 = document.getElementById("chartStatus");
-
   if(chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
@@ -391,7 +398,7 @@ function generatePivot(){
 
 
   // =========================
-  // 3. CHART AREA STATUS
+  // 3. CHART AREA STATUS (STACKED)
   // =========================
   let areaStatus = {};
 
@@ -408,8 +415,6 @@ function generatePivot(){
       areaStatus[area].notPaid += d.amount || 0;
     }
   });
-
-  let ctx3 = document.getElementById("chartAreaStatus");
 
   if(chartAreaStatus) chartAreaStatus.destroy();
 
@@ -437,7 +442,6 @@ function generatePivot(){
     }
   });
 
-
   // =========================
   // 4. PIVOT TABLE
   // =========================
@@ -447,6 +451,7 @@ function generatePivot(){
 
 // ================= TABLE =================
 function renderPivotTable(data){
+
   let tbody = document.querySelector("#pivotTable tbody");
   if(!tbody) return;
 
@@ -455,6 +460,8 @@ function renderPivotTable(data){
   let pivot = {};
 
   data.forEach(d=>{
+    if(!d) return;
+
     let area = d.area || "UNKNOWN";
 
     if(!pivot[area]){
