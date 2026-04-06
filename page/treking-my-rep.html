@@ -107,8 +107,8 @@ thead th{
 /* ==================== CHART GRID ==================== */
 .chart-grid{
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 kolom desktop */
-  gap: 20px; /* jarak antar chart */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
   margin-top: 16px;
 }
 
@@ -122,14 +122,10 @@ thead th{
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* HOVER EFFECT */
 .chart-card:hover{
   transform: translateY(-3px);
   box-shadow: 0 10px 24px rgba(0,0,0,0.45);
 }
-
-/* TOP ACCENT LINE */
 .chart-card::before{
   content: "";
   position: absolute;
@@ -146,14 +142,14 @@ thead th{
 /* ==================== SIZE CANVAS ==================== */
 canvas{
   width: 100% !important;
-  height: 260px !important; /* nyaman di laptop */
+  height: 260px !important;
 }
 
 /* ==================== WRAPPER PIVOT ==================== */
 #pivot{
   max-width: 1100px;
   margin: auto;
-  padding: 0 12px; /* biar nggak mepet kiri-kanan */
+  padding: 0 12px;
 }
 
 /* ==================== PIVOT TABLE ==================== */
@@ -165,94 +161,18 @@ canvas{
   overflow:hidden;
   margin-top:20px;
 }
-
-/* HEADER TABLE */
 .table-wrapper thead{
   background:#6d28d9;
   color:white;
 }
-
-/* BODY TABLE SCROLL */
 .table-body{
   max-height:220px;
   overflow-y:auto;
 }
-
-/* TABLE BIASA */
 table{
   width:100%;
-  border-collapse:collapse;
-}
-
-td, th{
-  padding:10px;
-  text-align:center;
-  border-bottom:1px solid #333;
-}
-
-/* TOTAL ROW FIX */
-.total-row{
-  background:#2a2a2a;
-  font-weight:bold;
-  color:#22c55e;
-}
-
-/* SCROLLBAR CUSTOM */
-.table-body::-webkit-scrollbar{
-  width:6px;
-}
-.table-body::-webkit-scrollbar-thumb{
-  background:#555;
-  border-radius:10px;
-}
-
-/* ==================== TAB ==================== */
-.tab{
-  display:none;
-}
-.tab.active{
-  display:block;
-}
-
-/* MENU BUTTONS */
-.menu button{
-  padding:8px 16px;
-  margin-right:6px;
-  border:none;
-  border-radius:6px;
-  background:#333;
-  color:white;
-  cursor:pointer;
-  transition:0.2s;
-}
-.menu button:hover{
-  background:#4f46e5;
-}
-.menu button.active{
-  background:#4f46e5;
-  font-weight:bold;
-}
-
-/* ==================== RESPONSIVE HP ==================== */
-@media(max-width:768px){
-  .chart-grid{
-    grid-template-columns: 1fr; /* 1 kolom HP */
-    gap: 14px;
-  }
-
-  canvas{
-    height: 220px !important;
-  }
-
-  .table-body{
-    max-height:180px;
-  }
-
-  .menu button{
-    padding:6px 12px;
-    margin-right:4px;
-  }
-}
+  border
+  
 #upload{display:none;}
 </style>
 </head>
@@ -263,7 +183,7 @@ td, th{
 
 <!-- MENU TAB -->
 <div class="menu">
-  <button onclick="showTab('data')" class="active">📋 Data</button>
+  <button class="active" onclick="showTab('data')">📋 Data</button>
   <button onclick="showTab('pivot')">📈 Pivot</button>
 </div>
 
@@ -275,7 +195,8 @@ td, th{
   <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
   <button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
 
-  <input type="file" id="upload" accept=".xlsx,.xls">
+  <!-- INPUT FILE HIDDEN -->
+  <input type="file" id="upload" accept=".xlsx,.xls" style="display:none;">
 </div>
 
 <!-- TAB DATA -->
@@ -300,7 +221,9 @@ td, th{
           <th>Aksi</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- Data akan di-render oleh JS -->
+      </tbody>
     </table>
   </div>
 </div>
@@ -339,7 +262,7 @@ td, th{
   <!-- PIVOT TABLE -->
   <h3 style="margin-top:20px;">📋 Pivot Table</h3>
   <div class="table-wrapper">
-    <table>
+    <table class="pivot-header">
       <thead>
         <tr>
           <th>Area</th>
@@ -354,11 +277,13 @@ td, th{
 
     <div class="table-body">
       <table>
-        <tbody id="pivotBody"></tbody>
+        <tbody id="pivotBody">
+          <!-- Pivot data akan di-render oleh JS -->
+        </tbody>
       </table>
     </div>
 
-    <table>
+    <table class="pivot-footer">
       <tbody>
         <tr class="total-row" id="pivotTotal"></tr>
       </tbody>
