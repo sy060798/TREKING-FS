@@ -158,27 +158,64 @@ canvas{
   margin:auto;
   background:#1e1e1e;
   border-radius:12px;
-  overflow:hidden;
   margin-top:20px;
-}
-.table-wrapper thead{
-  background:#6d28d9;
-  color:white;
-}
-.table-body{
-  max-height:220px;
-  overflow-y:auto;
-}
-table{
-  width:100%;
-  border-collapse: collapse;
+
+  /* 🔥 scroll sekarang di sini */
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-  .total-row{
+/* 🔥 SATU TABEL (WAJIB) */
+.table-wrapper table{
+  width:100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* kunci biar sejajar */
+}
+
+/* HEADER */
+.table-wrapper thead th{
+  background:#6d28d9;
+  color:white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* CELL */
+.table-wrapper th,
+.table-wrapper td{
+  padding:8px;
+  text-align:center;
+  border-bottom:1px solid #444;
+  white-space: nowrap;
+}
+
+/* ANGKA RATA KANAN */
+.table-wrapper td:nth-child(4),
+.table-wrapper td:nth-child(5),
+.table-wrapper td:nth-child(6){
+  text-align:right;
+}
+
+/* HOVER */
+.table-wrapper tbody tr:hover{
+  background:#2a2a2a;
+}
+
+/* TOTAL ROW */
+.total-row{
   background:#111;
   font-weight:bold;
   color:#22c55e;
 }
+
+/* ❌ HAPUS INI (BIKIN ERROR ALIGN) */
+/*
+.table-body{
+  max-height:220px;
+  overflow-y:auto;
+}
+*/
   
 #upload{display:none;}
 </style>
@@ -269,26 +306,25 @@ table{
   <!-- PIVOT TABLE -->
   <h3 style="margin-top:20px;">📋 Pivot Table</h3>
   <div class="table-wrapper">
-    <table class="pivot-header">
-      <thead>
-        <tr>
-          <th>Area</th>
-          <th>Paid (Count)</th>
-          <th>Not Paid (Count)</th>
-          <th>Paid (Rp)</th>
-          <th>Not Paid (Rp)</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-    </table>
+  <table>
+    <thead>
+      <tr>
+        <th>Area</th>
+        <th>Paid (Count)</th>
+        <th>Not Paid (Count)</th>
+        <th>Paid (Rp)</th>
+        <th>Not Paid (Rp)</th>
+        <th>Total</th>
+      </tr>
+    </thead>
 
-    <div class="table-body">
-      <table>
-        <tbody id="pivotBody">
-          <!-- Pivot data akan di-render oleh JS -->
-        </tbody>
-      </table>
-    </div>
+    <tbody id="pivotBody"></tbody>
+
+    <tfoot>
+      <tr class="total-row" id="pivotTotal"></tr>
+    </tfoot>
+  </table>
+</div>
 
     <table class="pivot-footer">
       <tbody>
