@@ -302,77 +302,30 @@ window.addEventListener("load",async function(){
 // ================= TAMBAHAN =================
 function triggerUpload(){ document.getElementById('upload').click(); }
 
-// ================= all pivot =================
-
-function showTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  if(id==="pivot"){
-    loadFilter();
-    setTimeout(()=>{
-      generatePivot();
-    },200);
-  }
-}
-
-
-// ================= LOAD FILTER =================
-function loadFilter(){
-
-  let areaSet = new Set();
-  let bulanSet = new Set();
-
-  dataList.forEach(d=>{
-    if(!d) return;
-    if(d.area) areaSet.add(d.area);
-    if(d.month) bulanSet.add(d.month);
-  });
-
-  let areaSelect = document.getElementById("filterArea");
-  let bulanSelect = document.getElementById("filterBulan");
-
-  if(!areaSelect || !bulanSelect) return;
-
-  areaSelect.innerHTML = `<option value="">Semua Area</option>`;
-  bulanSelect.innerHTML = `<option value="">Semua Bulan</option>`;
-
-  areaSet.forEach(a=>{
-    areaSelect.innerHTML += `<option value="${a}">${a}</option>`;
-  });
-
-  bulanSet.forEach(b=>{
-    bulanSelect.innerHTML += `<option value="${b}">${b}</option>`;
-  });
-}
-
-
 // ================= PIVOT =================
 function generatePivot(){
 
-  // 🔥 VALIDASI DATA
   if(!Array.isArray(dataList) || dataList.length === 0){
     console.log("Data kosong");
     return;
   }
 
-  // 🔥 AMBIL FILTER
-  let areaFilter = document.getElementById("filterArea")?.value || "";
-  let bulanFilter = document.getElementById("filterBulan")?.value || "";
-  let remarkFilter = document.getElementById("filterRemark")?.value || "";
+  // 🔥 FILTER
+  const areaFilter   = document.getElementById("filterArea")?.value || "";
+  const bulanFilter  = document.getElementById("filterBulan")?.value || "";
+  const remarkFilter = document.getElementById("filterRemark")?.value || "";
 
-  // 🔥 FILTER DATA
-  let filteredData = dataList.filter(d=>{
-    return d &&
-      (!areaFilter || d.area===areaFilter) &&
-      (!bulanFilter || d.month===bulanFilter) &&
-      (!remarkFilter || d.remark===remarkFilter);
-  });
+  const filteredData = dataList.filter(d =>
+    d &&
+    (!areaFilter  || d.area   === areaFilter) &&
+    (!bulanFilter || d.month  === bulanFilter) &&
+    (!remarkFilter|| d.remark === remarkFilter)
+  );
 
-  // 🔥 CEK CANVAS (WAJIB)
-  let ctx1 = document.getElementById("chartAmount");
-  let ctx2 = document.getElementById("chartStatus");
-  let ctx3 = document.getElementById("chartAreaStatus");
+  // 🔥 CEK CANVAS
+  const ctx1 = document.getElementById("chartAmount");
+  const ctx2 = document.getElementById("chartStatus");
+  const ctx3 = document.getElementById("chartAreaStatus");
 
   if(!ctx1 || !ctx2 || !ctx3){
     console.log("Canvas belum siap");
@@ -380,16 +333,37 @@ function generatePivot(){
   }
 
   // =========================
-  // 1. CHART TOTAL AMOUNT
+  // 🔥 SATU LOOP SEMUA HITUNGAN
   // =========================
   let areaMap = {};
+  let areaStatus = {};
+  let paid = 0;
+  let notPaid = 0;
 
   filteredData.forEach(d=>{
-    let area = d.area || "UNKNOWN";
-    if(!areaMap[area]) areaMap[area] = 0;
-    areaMap[area] += d.amount || 0;
+    const area = d.area || "UNKNOWN";
+    const amount = d.amount || 0;
+    const isPaid = (d.remark || "").toUpperCase() === "PAID";
+
+    // TOTAL AMOUNT
+    areaMap[area] = (areaMap[area] || 0) + amount;
+
+    // STATUS GLOBAL
+    if(isPaid) paid += amount;
+    else notPaid += amount;
+
+    // STATUS PER AREA
+    if(!areaStatus[area]){
+      areaStatus[area] = { paid:0, notPaid:0 };
+    }
+
+    if(isPaid) areaStatus[area].paid += amount;
+    else areaStatus[area].notPaid += amount;
   });
 
+  // =========================
+  // 1. CHART TOTAL AMOUNT
+  // =========================
   if(chartAmount) chartAmount.destroy();
 
   chartAmount = new Chart(ctx1, {
@@ -403,21 +377,9 @@ function generatePivot(){
     }
   });
 
-
   // =========================
-  // 2. CHART PAID vs NOT PAID
+  // 2. PIE CHART STATUS
   // =========================
-  let paid = 0;
-  let notPaid = 0;
-
-  filteredData.forEach(d=>{
-    if((d.remark || "").toUpperCase() === "PAID"){
-      paid += d.amount || 0;
-    } else {
-      notPaid += d.amount || 0;
-    }
-  });
-
   if(chartStatus) chartStatus.destroy();
 
   chartStatus = new Chart(ctx2, {
@@ -430,26 +392,9 @@ function generatePivot(){
     }
   });
 
-
   // =========================
-  // 3. CHART AREA STATUS (STACKED)
+  // 3. STACKED AREA STATUS
   // =========================
-  let areaStatus = {};
-
-  filteredData.forEach(d=>{
-    let area = d.area || "UNKNOWN";
-
-    if(!areaStatus[area]){
-      areaStatus[area] = { paid:0, notPaid:0 };
-    }
-
-    if((d.remark || "").toUpperCase() === "PAID"){
-      areaStatus[area].paid += d.amount || 0;
-    } else {
-      areaStatus[area].notPaid += d.amount || 0;
-    }
-  });
-
   if(chartAreaStatus) chartAreaStatus.destroy();
 
   chartAreaStatus = new Chart(ctx3, {
@@ -469,6 +414,7 @@ function generatePivot(){
     },
     options:{
       responsive:true,
+      maintainAspectRatio:false, // 🔥 biar ikut CSS
       scales:{
         x:{ stacked:true },
         y:{ stacked:true }
@@ -477,42 +423,7 @@ function generatePivot(){
   });
 
   // =========================
-  // 4. PIVOT TABLE
+  // 4. TABLE
   // =========================
   renderPivotTable(filteredData);
-}
-
-
-// ================= TABLE =================
-function renderPivotTable(data){
-
-  let tbody = document.querySelector("#pivotTable tbody");
-  if(!tbody) return;
-
-  tbody.innerHTML = "";
-
-  let pivot = {};
-
-  data.forEach(d=>{
-    if(!d) return;
-
-    let area = d.area || "UNKNOWN";
-
-    if(!pivot[area]){
-      pivot[area] = { stb:0, amount:0 };
-    }
-
-    pivot[area].stb += d.stb || 0;
-    pivot[area].amount += d.amount || 0;
-  });
-
-  Object.keys(pivot).forEach(area=>{
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${area}</td>
-      <td>${pivot[area].stb}</td>
-      <td>${pivot[area].amount}</td>
-    `;
-    tbody.appendChild(tr);
-  });
 }
