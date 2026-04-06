@@ -114,7 +114,7 @@ thead th{
 
 /* ==================== CHART CARD ==================== */
 .chart-card{
-  background: #1e1e1e; /* lebih terang & modern */
+  background: #1e1e1e;
   padding: 16px;
   border-radius: 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
@@ -141,11 +141,6 @@ thead th{
   opacity: 0.8;
   border-top-left-radius: 14px;
   border-top-right-radius: 14px;
-}
-
-/* CHART FULL WIDTH */
-.chart-card.full{
-  grid-column: span 2;
 }
 
 /* ==================== SIZE CANVAS ==================== */
@@ -179,7 +174,7 @@ canvas{
 
 /* BODY TABLE SCROLL */
 .table-body{
-  max-height:220px; /* kira2 5 row */
+  max-height:220px;
   overflow-y:auto;
 }
 
@@ -245,16 +240,12 @@ td, th{
     gap: 14px;
   }
 
-  .chart-card.full{
-    grid-column: span 1; /* full chart jadi 1 kolom */
-  }
-
   canvas{
-    height: 220px !important; /* lebih pas di layar kecil */
+    height: 220px !important;
   }
 
   .table-body{
-    max-height:180px; /* lebih pas di HP */
+    max-height:180px;
   }
 
   .menu button{
@@ -342,9 +333,6 @@ td, th{
     </div>
     <div class="chart-card">
       <canvas id="chartStatus"></canvas>
-    </div>
-    <div class="chart-card full">
-      <canvas id="chartAreaStatus"></canvas>
     </div>
   </div>
 
