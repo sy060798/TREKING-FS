@@ -104,74 +104,76 @@ thead th{
   margin-bottom:15px;
 }
   
-/* GRID CHART */
+/* ==================== CHART GRID ==================== */
 .chart-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:20px; /* 🔥 lebih lega */
-  margin-top:16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 kolom desktop */
+  gap: 20px; /* jarak antar chart */
+  margin-top: 16px;
 }
 
-/* CARD */
+/* ==================== CHART CARD ==================== */
 .chart-card{
-  background:#1e1e1e; /* 🔥 sedikit lebih terang */
-  padding:16px; /* 🔥 lebih lega */
-  border-radius:14px; /* 🔥 lebih smooth */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35); /* 🔥 depth */
-  transition: all 0.2s ease;
+  background: #1e1e1e; /* lebih terang & modern */
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
   position: relative;
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 🔥 HOVER EFFECT BIAR HIDUP */
+/* HOVER EFFECT */
 .chart-card:hover{
   transform: translateY(-3px);
   box-shadow: 0 10px 24px rgba(0,0,0,0.45);
 }
 
-/* 🔥 TOP ACCENT LINE (biar ada karakter) */
+/* TOP ACCENT LINE */
 .chart-card::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:3px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
   background: linear-gradient(90deg, #4f46e5, #22c55e);
-  opacity:0.8;
+  opacity: 0.8;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
 }
 
-/* CHART FULL */
+/* CHART FULL WIDTH */
 .chart-card.full{
   grid-column: span 2;
 }
 
-/* SIZE CHART */
+/* ==================== SIZE CANVAS ==================== */
 canvas{
-  width:100% !important;
-  height:260px !important; /* 🔥 lebih nyaman diliat */
+  width: 100% !important;
+  height: 260px !important; /* nyaman di laptop */
 }
 
-/* WRAPPER */
+/* ==================== WRAPPER PIVOT ==================== */
 #pivot{
-  max-width:1100px;
-  margin:auto;
-  padding:0 12px; /* 🔥 biar gak mepet kiri kanan */
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 12px; /* biar nggak mepet kiri-kanan */
 }
 
-/* 🔥 RESPONSIVE HP */
+/* ==================== RESPONSIVE HP ==================== */
 @media(max-width:768px){
   .chart-grid{
-    grid-template-columns: 1fr;
-    gap:14px;
+    grid-template-columns: 1fr; /* 1 kolom HP */
+    gap: 14px;
   }
 
   .chart-card.full{
-    grid-column: span 1;
+    grid-column: span 1; /* full chart jadi 1 kolom */
   }
 
   canvas{
-    height:220px !important;
+    height: 220px !important; /* lebih pas di layar kecil */
   }
 }
 #upload{display:none;}
@@ -226,61 +228,59 @@ canvas{
 
 <!-- TAB PIVOT -->
 <div id="pivot" class="tab">
-<h3>📈 Pivot Grafik</h3>
+  <h3>📈 Pivot Grafik</h3>
 
-<!-- FILTER -->
-<div class="filter-box">
-  <select id="filterArea" onchange="generatePivot()">
-    <option value="">Semua Area</option>
-  </select>
+  <!-- FILTER -->
+  <div class="filter-box">
+    <select id="filterArea" onchange="generatePivot()">
+      <option value="">Semua Area</option>
+    </select>
 
-  <select id="filterBulan" onchange="generatePivot()">
-    <option value="">Semua Bulan</option>
-  </select>
+    <select id="filterBulan" onchange="generatePivot()">
+      <option value="">Semua Bulan</option>
+    </select>
 
-  <select id="filterRemark" onchange="generatePivot()">
-    <option value="">Semua Status</option>
-    <option value="PAID">PAID</option>
-    <option value="NOT PAID">NOT PAID</option>
-  </select>
-</div>
-
-<!-- 🔥 GRID CHART -->
-<div class="chart-grid">
-
-  <!-- CHART 1 -->
-  <div class="chart-card">
-    <canvas id="chartAmount"></canvas>
+    <select id="filterRemark" onchange="generatePivot()">
+      <option value="">Semua Status</option>
+      <option value="PAID">PAID</option>
+      <option value="NOT PAID">NOT PAID</option>
+    </select>
   </div>
 
-  <!-- CHART 2 -->
-  <div class="chart-card">
-    <canvas id="chartStatus"></canvas>
+  <!-- GRID CHART -->
+  <div class="chart-grid">
+
+    <!-- CHART 1: TOTAL AMOUNT -->
+    <div class="chart-card">
+      <canvas id="chartAmount"></canvas>
+    </div>
+
+    <!-- CHART 2: PAID vs NOT PAID -->
+    <div class="chart-card">
+      <canvas id="chartStatus"></canvas>
+    </div>
+
+    <!-- CHART 3: AREA STATUS (STACKED) FULL WIDTH -->
+    <div class="chart-card full">
+      <canvas id="chartAreaStatus"></canvas>
+    </div>
+
   </div>
 
-  <!-- CHART 3 FULL -->
-  <div class="chart-card full">
-    <canvas id="chartAreaStatus"></canvas>
+  <!-- PIVOT TABLE -->
+  <h3 style="margin-top:20px;">📋 Pivot Table</h3>
+  <div class="table-wrap">
+    <table id="pivotTable">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>Total STB</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
-
-</div>
-
-<!-- 🔥 PIVOT TABLE -->
-<h3 style="margin-top:20px;">📋 Pivot Table</h3>
-
-<div class="table-wrap">
-<table id="pivotTable">
-<thead>
-<tr>
-<th>Area</th>
-<th>Total STB</th>
-<th>Total Amount</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-
 </div>
 
 <!-- MODAL EDIT -->
