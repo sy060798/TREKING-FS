@@ -16,15 +16,12 @@ body{
   color:#fff;
   padding:20px;
 }
-
 h2{text-align:center;}
-
 .menu{
   display:flex;
   gap:10px;
   margin-bottom:15px;
 }
-
 .menu button{
   background:#8e44ad;
   color:white;
@@ -33,54 +30,46 @@ h2{text-align:center;}
   border-radius:6px;
   cursor:pointer;
 }
-
 .btn-group{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
   margin-bottom:15px;
 }
-
 button{
   padding:8px 12px;
   border:none;
   border-radius:6px;
   cursor:pointer;
 }
-
 .blue{background:#3498db;color:white;}
 .red{background:#e74c3c;color:white;}
 .orange{background:#f39c12;color:white;}
-
 .table-wrap{
   overflow:auto;
   max-height:500px;
   background:#222;
   border-radius:10px;
 }
-
 table{
   width:100%;
   min-width:1200px;
   border-collapse:collapse;
 }
-
 th,td{
   padding:6px;
   font-size:12px;
   text-align:center;
   border-bottom:1px solid #444;
+  cursor:pointer;
 }
-
 thead th{
   background:#8e44ad;
   position:sticky;
   top:0;
 }
-
 .tab{display:none;}
 .active{display:block;}
-
 #modalEdit{
   display:none;
   position:fixed;
@@ -92,14 +81,12 @@ thead th{
   justify-content:center;
   align-items:center;
 }
-
 .box{
   background:#222;
   padding:20px;
   border-radius:10px;
   width:320px;
 }
-
 .box input{
   width:100%;
   padding:6px;
@@ -108,7 +95,6 @@ thead th{
   color:white;
   border:1px solid #555;
 }
-
 #upload{display:none;}
 </style>
 </head>
@@ -117,92 +103,83 @@ thead th{
 
 <h2>📊 TREKING MY REP</h2>
 
-<!-- MENU TAB -->
 <div class="menu">
-  <button onclick="showTab('data')">📋 Data</button>
-  <button onclick="showTab('pivot')">📈 Pivot</button>
+<button onclick="showTab('data')">📋 Data</button>
+<button onclick="showTab('pivot')">📈 Pivot</button>
 </div>
 
-<!-- BUTTON ACTION -->
 <div class="btn-group">
-  <button class="blue" onclick="exportExcel()">⬇ Download</button>
-  <button class="orange" onclick="triggerUpload()">⬆ Upload</button>
-  <button class="orange" onclick="cekUpdate()">🔄 Update</button>
-  <button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
-  <button class="orange" onclick="editMassal()">✏ Edit Massal</button>
-  <button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
+<button class="blue" onclick="exportExcel()">⬇ Download</button>
+<button class="orange" onclick="triggerUpload()">⬆ Upload</button>
+<button class="orange" onclick="cekUpdate()">🔄 Update</button>
+<button class="red" onclick="hapusTerpilih()">🗑 Hapus</button>
+<button class="orange" onclick="editMassal()">✏ Edit Massal</button>
+<button class="blue" onclick="kirimKeServer()">🚀 Upload Server</button>
 
-  <input type="file" id="upload" accept=".xlsx,.xls">
+<input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
 <!-- TAB DATA -->
 <div id="data" class="tab active">
-  <div class="table-wrap">
-    <table id="tableData">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th><input type="checkbox" id="checkAll"></th>
-          <th>ID</th>
-          <th>WO</th>
-          <th>Area</th>
-          <th>WO Type</th>
-          <th>STB</th>
-          <th>DPP</th>
-          <th>Amount</th>
-          <th>Remark</th>
-          <th>Server</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div class="table-wrap">
+<table id="tableData">
+<thead>
+<tr>
+<th>No</th>
+<th><input type="checkbox" id="checkAll"></th>
+<th>ID</th>
+<th>WO</th>
+<th>Area</th>
+<th>WO Type</th>
+<th>STB</th>
+<th>DPP</th>
+<th>Amount</th>
+<th>Remark</th>
+<th>Server</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 </div>
 
 <!-- TAB PIVOT -->
 <div id="pivot" class="tab">
-  <h3>📈 Pivot Grafik</h3>
-
-  <!-- FILTER -->
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-    <select id="filterArea" onchange="generatePivot()">
-      <option value="">Semua Area</option>
-    </select>
-
-    <select id="filterBulan" onchange="generatePivot()">
-      <option value="">Semua Bulan</option>
-    </select>
-
-    <select id="filterRemark" onchange="generatePivot()">
-      <option value="">Semua Status</option>
-      <option value="PAID">PAID</option>
-      <option value="NOT PAID">NOT PAID</option>
-    </select>
-  </div>
-
-  <!-- 2 GRAFIK -->
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-    <canvas id="chartAmount"></canvas>
-    <canvas id="chartStatus"></canvas>
-  </div>
+<h3>📈 Pivot Grafik</h3>
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+  <select id="filterArea" onchange="generatePivot()">
+    <option value="">Semua Area</option>
+  </select>
+  <select id="filterBulan" onchange="generatePivot()">
+    <option value="">Semua Bulan</option>
+  </select>
+  <select id="filterRemark" onchange="generatePivot()">
+    <option value="">Semua Status</option>
+    <option value="PAID">PAID</option>
+    <option value="NOT PAID">NOT PAID</option>
+  </select>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+  <canvas id="chartAmount"></canvas>
+  <canvas id="chartStatus"></canvas>
+</div>
 </div>
 
 <!-- MODAL EDIT -->
 <div id="modalEdit">
-  <div class="box">
-    <h3>Edit Data</h3>
-    <input id="edit_wo" placeholder="WO">
-    <input id="edit_area" placeholder="Area">
-    <input id="edit_stb" placeholder="STB">
-    <input id="edit_remark" placeholder="Remark">
-    <button onclick="saveEdit()" class="blue">Save</button>
-    <button onclick="closeModal()" class="red">Close</button>
-  </div>
+<div class="box">
+<h3>Edit Data</h3>
+<input id="edit_wo" placeholder="WO">
+<input id="edit_area" placeholder="Area">
+<input id="edit_stb" placeholder="STB">
+<input id="edit_remark" placeholder="Remark">
+<button onclick="saveEdit()" class="blue">Save</button>
+<button onclick="closeModal()" class="red">Close</button>
+</div>
 </div>
 
-<!-- JS -->
-<script src="../js/myrep.js"></script>
+<script src="js-myrep.js"></script>
 
 </body>
 </html>
