@@ -164,58 +164,92 @@ function updateNote(id, value){
 
 // ================= EDIT =================
 function editData(id){
-  currentEditId=id;
-  let d = dataList.find(x=>String(x.id)===String(id));
-  if(!d) return;
+  currentEditId = String(id);
 
-  edit_wo.value=d.wo;
-  edit_area.value=d.area;
-  edit_stb.value=d.stb;
-  edit_remark.value=d.remark;
+  let d = dataList.find(x => String(x.id) === currentEditId);
+  if(!d){
+    alert("Data tidak ditemukan");
+    return;
+  }
 
-  modalEdit.style.display="flex";
+  // isi form
+  document.getElementById("edit_wo").value = d.wo || "";
+  document.getElementById("edit_area").value = d.area || "";
+  document.getElementById("edit_stb").value = d.stb ?? 0;
+  document.getElementById("edit_remark").value = d.remark || "";
+
+  // tampilkan modal
+  document.getElementById("modalEdit").style.display = "flex";
 }
+
 
 // ================= SAVE EDIT =================
 function saveEdit(){
 
-  // 🔥 MASS EDIT
+  if(!currentEditId){
+    alert("Tidak ada data dipilih");
+    return;
+  }
+
+  const inputWO = document.getElementById("edit_wo").value.trim();
+  const inputArea = document.getElementById("edit_area").value.trim();
+  const inputSTB = document.getElementById("edit_stb").value;
+  const inputRemark = document.getElementById("edit_remark").value.trim();
+
+  // ================= MASS EDIT =================
   if(Array.isArray(currentEditId)){
 
     dataList.forEach(d=>{
       if(currentEditId.includes(String(d.id))){
 
-        if(edit_wo.value) d.wo = edit_wo.value;
-        if(edit_area.value) d.area = edit_area.value;
-        if(edit_stb.value) d.stb = parseInt(edit_stb.value)||0;
-        if(edit_remark.value) d.remark = edit_remark.value;
+        if(inputWO !== "") d.wo = inputWO;
+        if(inputArea !== "") d.area = inputArea;
 
-        let harga=getHarga(d.area);
-        d.dpp=harga+(d.stb*50000);
-        d.amount=Math.round(d.dpp*1.11);
+        // 🔥 FIX: STB boleh 0
+        if(inputSTB !== "") d.stb = parseInt(inputSTB) || 0;
+
+        if(inputRemark !== "") d.remark = inputRemark;
+
+        // hitung ulang
+        let harga = getHarga(d.area);
+        d.dpp = harga + (d.stb * 50000);
+        d.amount = Math.round(d.dpp * 1.11);
       }
     });
 
   } else {
 
-    // 🔥 SINGLE EDIT
-    let d=dataList.find(x=>String(x.id)===String(currentEditId));
-    if(!d) return;
+    // ================= SINGLE EDIT =================
+    let d = dataList.find(x => String(x.id) === String(currentEditId));
+    if(!d){
+      alert("Data tidak ditemukan");
+      return;
+    }
 
-    d.wo=edit_wo.value;
-    d.area=edit_area.value;
-    d.stb=parseInt(edit_stb.value)||0;
+    d.wo = inputWO;
+    d.area = inputArea;
+    d.stb = parseInt(inputSTB) || 0;
+    d.remark = inputRemark;
 
-    let harga=getHarga(d.area);
-    d.dpp=harga+(d.stb*50000);
-    d.amount=Math.round(d.dpp*1.11);
-    d.remark=edit_remark.value;
+    let harga = getHarga(d.area);
+    d.dpp = harga + (d.stb * 50000);
+    d.amount = Math.round(d.dpp * 1.11);
   }
 
   renderTable();
-  loadFilter();
-  generatePivot();
+  loadFilter();     // 🔥 update filter
+  generatePivot();  // 🔥 update chart
   closeModal();
+}
+
+
+// ================= CLOSE MODAL =================
+function closeModal(){
+  const modal = document.getElementById("modalEdit");
+  if(modal){
+    modal.style.display = "none";
+  }
+  currentEditId = null;
 }
 
 // ================= EDIT MASSAL =================
