@@ -22,31 +22,38 @@ function showTab(tabId) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.getElementById(tabId)?.classList.add('active');
 
+  document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.menu button[onclick="showTab('${tabId}')"]`)?.classList.add('active');
+
   if (tabId === "pivot") {
     loadFilter();
-    setTimeout(()=>generatePivot(),200);
+    setTimeout(generatePivot, 200);
   }
 }
 
-document.addEventListener("DOMContentLoaded", ()=>{
-  showTab('data');
+// ================= INIT =================
+document.addEventListener("DOMContentLoaded", function(){
+
+  window.edit_wo = document.getElementById("edit_wo");
+  window.edit_area = document.getElementById("edit_area");
+  window.edit_stb = document.getElementById("edit_stb");
+  window.edit_remark = document.getElementById("edit_remark");
+  window.modalEdit = document.getElementById("modalEdit");
 
   let upload = document.getElementById("upload");
-  if(upload){
-    upload.addEventListener("click", ()=>upload.value=null);
-    upload.addEventListener("change", importExcel);
-  }
+  upload?.addEventListener("click", ()=>upload.value=null);
+  upload?.addEventListener("change", importExcel);
 
   document.getElementById("checkAll")?.addEventListener("change", e=>{
     document.querySelectorAll("#tableData tbody input[type=checkbox]")
-      .forEach(c => c.checked = e.target.checked);
+    .forEach(c=>c.checked=e.target.checked);
   });
 });
 
 // ================= IMPORT =================
 function importExcel(e){
   let file = e.target.files[0];
-  if(!file) return;
+  if(!file){ alert("File tidak ada"); return; }
 
   let reader = new FileReader();
 
@@ -58,12 +65,12 @@ function importExcel(e){
       let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
 
       json.forEach(r=>{
-        let woBaru = (r.WO||"").trim();
-        let areaBaru = (r.AREA||"").trim();
-        let bulanBaru = (r.MONTH||"").trim();
+        let woBaru = (r.WO || "").toString().trim();
+        let areaBaru = (r.AREA || "").toString().trim();
+        let bulanBaru = (r.MONTH || "").toString().trim();
 
         let sudahAda = dataList.some(d =>
-          d.wo===woBaru && d.area===areaBaru && d.month===bulanBaru
+          d.wo === woBaru && d.area === areaBaru && d.month === bulanBaru
         );
 
         if(sudahAda){ duplicateCount++; return; }
@@ -84,15 +91,14 @@ function importExcel(e){
           dpp: dpp,
           amount: Math.round(dpp*1.11),
           remark: "NOT PAID",
-          note: "", // 🔥 NEW
+          note: "", // 🔥 TAMBAHAN
           server: "-"
         });
+
       });
     });
 
-    if(duplicateCount>0){
-      alert(duplicateCount+" data duplikat tidak dimasukkan");
-    }
+    if(duplicateCount>0) alert(duplicateCount+" data duplikat");
 
     renderTable();
     loadFilter();
@@ -104,23 +110,15 @@ function importExcel(e){
 // ================= RENDER =================
 function renderTable(){
   let tbody = document.querySelector("#tableData tbody");
-  if(!tbody) return;
-
-  tbody.innerHTML = "";
-
-  const noteFilter = document.getElementById("filterNote")?.value || "";
+  tbody.innerHTML="";
 
   if(dataList.length===0){
-    tbody.innerHTML=`<tr><td colspan="15">Tidak ada data</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="14">Tidak ada data</td></tr>`;
     return;
   }
 
   dataList.forEach((d,i)=>{
-    if(!d) return;
-    if(noteFilter && d.note !== noteFilter) return;
-
-    let tr = document.createElement("tr");
-
+    let tr=document.createElement("tr");
     tr.innerHTML=`
       <td>${i+1}</td>
       <td><input type="checkbox" data-id="${d.id}"></td>
@@ -135,111 +133,71 @@ function renderTable(){
       <td>${d.amount}</td>
       <td>${d.remark}</td>
 
-      <td contenteditable="true"
-          onblur="updateNote('${d.id}', this.innerText)">
-          ${d.note||""}
-      </td>
+      <!-- 🔥 NOTE TIDAK DITAMPILKAN VALUE -->
+      <td>${d.note || "-"}</td>
 
       <td>${d.server}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
     `;
-
     tbody.appendChild(tr);
   });
-}
-
-// ================= NOTE =================
-function updateNote(id,val){
-  let d = dataList.find(x=>String(x.id)===String(id));
-  if(d) d.note = val;
 }
 
 // ================= EDIT =================
 function editData(id){
   currentEditId=id;
-  let d = dataList.find(x=>String(x.id)===String(id));
+  let d=dataList.find(x=>String(x.id)===String(id));
+  if(!d) return;
+
   edit_wo.value=d.wo;
   edit_area.value=d.area;
   edit_stb.value=d.stb;
-  edit_remark.value=d.remark;
+
+  // 🔥 remark + note digabung
+  edit_remark.value = d.remark;
+
   modalEdit.style.display="flex";
 }
 
+// ================= SAVE =================
 function saveEdit(){
-  let d=dataList.find(x=>String(x.id)===String(currentEditId));
-  d.wo=edit_wo.value;
-  d.area=edit_area.value;
-  d.stb=parseInt(edit_stb.value)||0;
-  let harga=getHarga(d.area);
-  d.dpp=harga+(d.stb*50000);
-  d.amount=Math.round(d.dpp*1.11);
-  d.remark=edit_remark.value;
+
+  if(Array.isArray(currentEditId)){
+    dataList.forEach(d=>{
+      if(currentEditId.includes(String(d.id))){
+        d.remark = edit_remark.value || d.remark;
+        d.note = edit_remark.value || d.note; // 🔥 NOTE IKUT
+      }
+    });
+  }else{
+    let d=dataList.find(x=>String(x.id)===String(currentEditId));
+    if(!d) return;
+
+    d.wo=edit_wo.value;
+    d.area=edit_area.value;
+    d.stb=parseInt(edit_stb.value)||0;
+
+    let harga=getHarga(d.area);
+    d.dpp=harga+(d.stb*50000);
+    d.amount=Math.round(d.dpp*1.11);
+
+    d.remark=edit_remark.value;
+    d.note=edit_remark.value; // 🔥 NOTE
+  }
 
   renderTable();
+  loadFilter();
   closeModal();
 }
 
 function closeModal(){
   modalEdit.style.display="none";
+  currentEditId=null;
 }
-
-// ================= DELETE =================
-async function hapusTerpilih(){
-  let ids=[...document.querySelectorAll("#tableData tbody input:checked")]
-    .map(c=>String(c.dataset.id));
-
-  dataList = dataList.filter(d=>!ids.includes(String(d.id)));
-
-  await fetch(`${SERVER_URL}/api/delete`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(ids)
-  });
-
-  renderTable();
-}
-
-// ================= SERVER =================
-async function kirimKeServer(){
-  let res = await fetch(`${SERVER_URL}/api/save`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(dataList)
-  });
-
-  if(res.ok){
-    dataList.forEach(d=>d.server="✔ terkirim");
-    renderTable();
-    alert("Berhasil kirim");
-  }
-}
-
-// ================= AUTO LOAD =================
-window.addEventListener("load",async ()=>{
-  try{
-    let res=await fetch(`${SERVER_URL}/api/get`);
-    let json=await res.json();
-
-    dataList = json.flat().filter(d=>d);
-
-    // 🔥 fix note hilang
-    dataList.forEach(d=>{
-      if(!d.note) d.note="";
-      d.server="✔ dari server";
-    });
-
-    renderTable();
-    loadFilter();
-
-    setTimeout(()=>generatePivot(),200);
-
-  }catch(e){
-    console.log("server kosong");
-  }
-});
 
 // ================= FILTER =================
 function loadFilter(){
+
   const noteSet = new Set();
 
   dataList.forEach(d=>{
@@ -250,63 +208,60 @@ function loadFilter(){
 
   if(filterNote){
     filterNote.innerHTML =
-      `<option value="">Semua</option>`+
-      [...noteSet].map(n=>`<option>${n}</option>`).join("");
+      `<option value="">Semua</option>` +
+      [...noteSet].map(n=>`<option value="${n}">${n}</option>`).join("");
   }
 }
 
-// ================= UTILS =================
-function triggerUpload(){
-  document.getElementById('upload').click();
+document.addEventListener("change",function(e){
+  if(e.target.id==="filterNote"){
+    renderTableFiltered();
+    generatePivot();
+  }
+});
+
+// ================= FILTER TABLE =================
+function renderTableFiltered(){
+
+  let noteFilter = document.getElementById("filterNote")?.value || "";
+
+  let filtered = dataList.filter(d =>
+    !noteFilter || d.note === noteFilter
+  );
+
+  let tbody=document.querySelector("#tableData tbody");
+  tbody.innerHTML="";
+
+  filtered.forEach((d,i)=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input type="checkbox" data-id="${d.id}"></td>
+      <td>${d.id}</td>
+      <td>${d.wo}</td>
+      <td>${formatTanggalExcel(d.tanggal)}</td>
+      <td>${d.month}</td>
+      <td>${d.area}</td>
+      <td>${d.wotype}</td>
+      <td>${d.stb}</td>
+      <td>${d.dpp}</td>
+      <td>${d.amount}</td>
+      <td>${d.remark}</td>
+      <td>${d.note||"-"}</td>
+      <td>${d.server}</td>
+      <td><button onclick="editData('${d.id}')">✏</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
+// ================= FORMAT =================
 function formatTanggalExcel(serial){
   if(!serial) return "-";
   if(typeof serial==="string") return serial;
 
-  let d=new Date((serial-25569)*86400*1000);
-  return d.toLocaleDateString("id-ID");
-}
+  let utc_days=Math.floor(serial-25569);
+  let date=new Date(utc_days*86400*1000);
 
-// ================= PIVOT =================
-let chartAmount, chartStatus;
-
-function generatePivot(){
-
-  if(!dataList.length) return;
-
-  let areaMap={};
-  let paid=0,notPaid=0;
-
-  dataList.forEach(d=>{
-    let area=d.area||"UNKNOWN";
-    let amt=d.amount||0;
-
-    areaMap[area]=(areaMap[area]||0)+amt;
-
-    if(d.remark==="PAID") paid++;
-    else notPaid++;
-  });
-
-  let ctx1=document.getElementById("chartAmount");
-  let ctx2=document.getElementById("chartStatus");
-
-  if(chartAmount) chartAmount.destroy();
-  if(chartStatus) chartStatus.destroy();
-
-  chartAmount=new Chart(ctx1,{
-    type:"bar",
-    data:{
-      labels:Object.keys(areaMap),
-      datasets:[{data:Object.values(areaMap)}]
-    }
-  });
-
-  chartStatus=new Chart(ctx2,{
-    type:"bar",
-    data:{
-      labels:["PAID","NOT PAID"],
-      datasets:[{data:[paid,notPaid]}]
-    }
-  });
+  return date.toLocaleDateString("id-ID");
 }
