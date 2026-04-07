@@ -386,6 +386,7 @@ window.addEventListener("load",async function(){
     dataList.forEach(d=>d.server="✔ dari server");
 
     renderTable();
+    loadFilter();
     generatePivot();
 
   }catch(err){
