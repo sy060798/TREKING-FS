@@ -129,6 +129,125 @@ thead select{
 th:nth-child(13), td:nth-child(13){
   min-width:150px;
 }
+  /* ==================== CHART GRID ==================== */
+.chart-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+
+/* ==================== CHART CARD ==================== */
+.chart-card{
+  background: #1e1e1e;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+}
+
+.chart-card::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #4f46e5, #22c55e);
+  opacity: 0.8;
+}
+
+/* ==================== SIZE CANVAS ==================== */
+canvas{
+  width: 100% !important;
+  height: 260px !important;
+}
+
+/* ==================== WRAPPER PIVOT ==================== */
+#pivot{
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 12px;
+}
+
+/* ==================== FILTER BOX ==================== */
+.filter-box select{
+  background:#222;
+  color:white;
+  border:1px solid #555;
+  padding:6px;
+  border-radius:6px;
+}
+
+/* ==================== PIVOT TABLE ==================== */
+.table-wrapper{
+  max-width: 1100px;
+  margin:auto;
+  background:#1e1e1e;
+  border-radius:12px;
+  margin-top:20px;
+
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* TABLE FIX */
+.table-wrapper table{
+  width:100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* HEADER */
+.table-wrapper thead th{
+  background:#6d28d9;
+  color:white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* CELL */
+.table-wrapper th,
+.table-wrapper td{
+  padding:8px;
+  text-align:center;
+  border-bottom:1px solid #444;
+  white-space: nowrap;
+}
+
+/* ANGKA RATA KANAN */
+.table-wrapper td:nth-child(4),
+.table-wrapper td:nth-child(5),
+.table-wrapper td:nth-child(6){
+  text-align:right;
+}
+
+/* HOVER */
+.table-wrapper tbody tr:hover{
+  background:#2a2a2a;
+}
+
+/* TOTAL ROW */
+.total-row{
+  background:#111;
+  font-weight:bold;
+  color:#22c55e;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px){
+  .chart-grid{
+    grid-template-columns: 1fr;
+  }
+}
 
 #upload{display:none;}
 </style>
@@ -204,11 +323,17 @@ th:nth-child(13), td:nth-child(13){
     <select id="filterRemark"></select>
   </div>
 
-  <div class="chart-grid">
+ <div class="chart-grid">
+
+  <div class="chart-card">
     <canvas id="chartAmount"></canvas>
+  </div>
+
+  <div class="chart-card">
     <canvas id="chartStatus"></canvas>
   </div>
 
+</div>
   <h3 style="margin-top:20px;">📋 Pivot Table</h3>
 
   <div class="table-wrapper">
