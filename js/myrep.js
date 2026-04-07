@@ -280,3 +280,210 @@ function formatTanggalExcel(serial){
 function triggerUpload(){
   document.getElementById('upload').click();
 }
+
+// ================= GLOBAL CHART =================
+let chartAmount = null;
+let chartStatus = null;
+
+// ================= FORMAT RUPIAH =================
+function formatRupiah(angka){
+  return 'Rp ' + Number(angka || 0).toLocaleString('id-ID');
+}
+
+// ================= FILTER =================
+function loadFilter(){
+  const areaSet = new Set();
+  const bulanSet = new Set();
+  const remarkSet = new Set();
+
+  dataList.forEach(d => {
+    if(!d) return;
+    if(d.area) areaSet.add(d.area);
+    if(d.month) bulanSet.add(d.month);
+    if(d.remark) remarkSet.add(d.remark);
+  });
+
+  const filterArea = document.getElementById("filterArea");
+  const filterBulan = document.getElementById("filterBulan");
+  const filterRemark = document.getElementById("filterRemark");
+
+  if(filterArea){
+    filterArea.innerHTML = `<option value="">Semua Area</option>` +
+      [...areaSet].map(a => `<option value="${a}">${a}</option>`).join("");
+  }
+
+  if(filterBulan){
+    filterBulan.innerHTML = `<option value="">Semua Bulan</option>` +
+      [...bulanSet].map(b => `<option value="${b}">${b}</option>`).join("");
+  }
+
+  if(filterRemark){
+    filterRemark.innerHTML = `<option value="">Semua Status</option>` +
+      [...remarkSet].map(r => `<option value="${r}">${r}</option>`).join("");
+  }
+}
+
+// auto trigger pivot kalau filter berubah
+document.addEventListener("change", function(e){
+  if(
+    e.target.id === "filterArea" ||
+    e.target.id === "filterBulan" ||
+    e.target.id === "filterRemark"
+  ){
+    generatePivot();
+  }
+});
+
+// ================= PIVOT TABLE =================
+function renderPivotTable(areaDetail){
+  const tbody = document.getElementById("pivotBody");
+  const totalRow = document.getElementById("pivotTotal");
+
+  if(!tbody || !totalRow) return;
+
+  tbody.innerHTML = "";
+  totalRow.innerHTML = "";
+
+  if(Object.keys(areaDetail).length === 0){
+    tbody.innerHTML = `<tr><td colspan="6">Tidak ada data</td></tr>`;
+    return;
+  }
+
+  let totalPaid = 0;
+  let totalNotPaid = 0;
+  let totalPaidAmt = 0;
+  let totalNotPaidAmt = 0;
+
+  Object.keys(areaDetail).forEach(area => {
+    const d = areaDetail[area];
+    const total = d.paidAmount + d.notPaidAmount;
+
+    totalPaid += d.paidCount;
+    totalNotPaid += d.notPaidCount;
+    totalPaidAmt += d.paidAmount;
+    totalNotPaidAmt += d.notPaidAmount;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${area}</td>
+      <td>${d.paidCount}</td>
+      <td>${d.notPaidCount}</td>
+      <td>${formatRupiah(d.paidAmount)}</td>
+      <td>${formatRupiah(d.notPaidAmount)}</td>
+      <td>${formatRupiah(total)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  totalRow.innerHTML = `
+    <td><b>TOTAL</b></td>
+    <td><b>${totalPaid}</b></td>
+    <td><b>${totalNotPaid}</b></td>
+    <td><b>${formatRupiah(totalPaidAmt)}</b></td>
+    <td><b>${formatRupiah(totalNotPaidAmt)}</b></td>
+    <td><b>${formatRupiah(totalPaidAmt + totalNotPaidAmt)}</b></td>
+  `;
+}
+
+// ================= PIVOT =================
+function generatePivot() {
+
+  if (!Array.isArray(dataList) || dataList.length === 0) {
+    console.log("Data kosong");
+    return;
+  }
+
+  const areaFilter = document.getElementById("filterArea")?.value || "";
+  const bulanFilter = document.getElementById("filterBulan")?.value || "";
+  const remarkFilter = document.getElementById("filterRemark")?.value || "";
+
+  const filteredData = dataList.filter(d =>
+    d &&
+    (!areaFilter || d.area === areaFilter) &&
+    (!bulanFilter || d.month === bulanFilter) &&
+    (!remarkFilter || d.remark === remarkFilter)
+  );
+
+  const ctx1 = document.getElementById("chartAmount");
+  const ctx2 = document.getElementById("chartStatus");
+
+  if (!ctx1 || !ctx2) {
+    console.log("Canvas belum siap");
+    return;
+  }
+
+  let areaMap = {};
+  let areaDetail = {};
+
+  filteredData.forEach(d => {
+    const area = d.area || "UNKNOWN";
+    const amount = Number(d.amount) || 0;
+    const isPaid = (d.remark || "").toUpperCase() === "PAID";
+
+    if (!areaDetail[area]) {
+      areaDetail[area] = {
+        paidCount: 0,
+        notPaidCount: 0,
+        paidAmount: 0,
+        notPaidAmount: 0
+      };
+    }
+
+    areaMap[area] = (areaMap[area] || 0) + amount;
+
+    if (isPaid) {
+      areaDetail[area].paidCount++;
+      areaDetail[area].paidAmount += amount;
+    } else {
+      areaDetail[area].notPaidCount++;
+      areaDetail[area].notPaidAmount += amount;
+    }
+  });
+
+  let paidCount = 0;
+  let notPaidCount = 0;
+
+  Object.values(areaDetail).forEach(d => {
+    paidCount += d.paidCount;
+    notPaidCount += d.notPaidCount;
+  });
+
+  // 🔥 FIX CHART DESTROY
+  if (chartAmount instanceof Chart) {
+    chartAmount.destroy();
+  }
+
+  chartAmount = new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels: Object.keys(areaMap),
+      datasets: [{
+        label: "Total Amount",
+        data: Object.values(areaMap)
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+  if (chartStatus instanceof Chart) {
+    chartStatus.destroy();
+  }
+
+  chartStatus = new Chart(ctx2, {
+    type: "bar",
+    data: {
+      labels: ["PAID", "NOT PAID"],
+      datasets: [{
+        label: "Jumlah",
+        data: [paidCount, notPaidCount]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+  renderPivotTable(areaDetail);
+}
