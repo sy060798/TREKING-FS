@@ -175,36 +175,20 @@ function editData(id){
   modalEdit.style.display="flex";
 }
 
-function saveEdit(){
-  let d=dataList.find(x=>String(x.id)===String(currentEditId));
-  if(!d) return;
-
-  d.wo=edit_wo.value;
-  d.area=edit_area.value;
-  d.stb=parseInt(edit_stb.value)||0;
-
-  let harga=getHarga(d.area);
-  d.dpp=harga+(d.stb*50000);
-  d.amount=Math.round(d.dpp*1.11);
-  d.remark=edit_remark.value;
-
-  renderTable();
-  closeModal();
-}
-
-function closeModal(){
-  modalEdit.style.display="none";
-  currentEditId=null;
-}
-
 // ================= EDIT MASSAL =================
 function editMassal(){
   let checked=[...document.querySelectorAll("#tableData tbody input:checked")];
   if(checked.length===0){ alert("Pilih data dulu"); return; }
-  currentEditId=checked.map(c=>String(c.dataset.id));
-  modalEdit.style.display="flex";
-}
 
+  currentEditId=checked.map(c=>String(c.dataset.id));
+
+  // kosongin input kecuali remark
+  edit_wo.value="";
+  edit_area.value="";
+  edit_stb.value="";
+  edit_remark.value="";
+
+  modalEdit.style.display="flex";
 
 // ================= HAPUS =================
 async function hapusTerpilih(){
