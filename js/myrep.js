@@ -219,10 +219,12 @@ async function hapusTerpilih(){
 
 // ================= SERVER =================
 async function kirimKeServer(){
-  if(dataList.length===0){
-    alert("Data kosong");
-    return;
+  if(dataList.length===0){ 
+    alert("Data kosong"); 
+    return; 
   }
+
+  dataList = dataList.flat();
 
   try{
     let res = await fetch(`${SERVER_URL}/api/save`,{
@@ -233,16 +235,23 @@ async function kirimKeServer(){
       body: JSON.stringify(dataList)
     });
 
-    if(!res.ok) throw new Error("Server error");
+    let text = await res.text(); // 🔥 penting
+    console.log("RESPONSE SERVER:", text);
+
+    if(!res.ok){
+      throw new Error("Server error: " + text);
+    }
 
     dataList.forEach(d=>d.server="✔ terkirim");
-
     renderTable();
+    loadFilter();
+    generatePivot();
+
     alert("Berhasil kirim ke server");
 
   }catch(err){
-    alert("❌ Gagal kirim server");
-    console.error(err);
+    console.error("DETAIL ERROR:", err);
+    alert("Gagal kirim ke server\n" + err.message);
   }
 }
 
