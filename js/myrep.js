@@ -52,6 +52,19 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 });
 
+
+// ================= FILTER DATA TABLE =================
+document.addEventListener("input", function(e){
+  if(
+    e.target.id === "filter_wo" ||
+    e.target.id === "filter_bulan" ||
+    e.target.id === "filter_area"
+  ){
+    renderTable();
+  }
+});
+
+
 // ================= IMPORT =================
 function importExcel(e){
   let file = e.target.files[0];
@@ -115,12 +128,22 @@ function renderTable(){
   let tbody = document.querySelector("#tableData tbody");
   tbody.innerHTML = "";
 
-  if(dataList.length===0){
+  let fWO = document.getElementById("filter_wo")?.value.toLowerCase() || "";
+  let fBulan = document.getElementById("filter_bulan")?.value.toLowerCase() || "";
+  let fArea = document.getElementById("filter_area")?.value.toLowerCase() || "";
+
+  let filtered = dataList.filter(d =>
+    (!fWO || (d.wo || "").toLowerCase().includes(fWO)) &&
+    (!fBulan || (d.month || "").toLowerCase().includes(fBulan)) &&
+    (!fArea || (d.area || "").toLowerCase().includes(fArea))
+  );
+
+  if(filtered.length===0){
     tbody.innerHTML=`<tr><td colspan="15">Tidak ada data</td></tr>`;
     return;
   }
 
-  dataList.forEach((d,i)=>{
+  filtered.forEach((d,i)=>{
     let tr = document.createElement("tr");
 
     tr.innerHTML=`
@@ -137,7 +160,6 @@ function renderTable(){
       <td>${d.amount}</td>
       <td>${d.remark}</td>
 
-      <!-- 🔥 NOTE BISA DIKETIK -->
       <td>
         <input 
           value="${d.note || ""}" 
@@ -153,7 +175,6 @@ function renderTable(){
     tbody.appendChild(tr);
   });
 }
-
 // ================= UPDATE NOTE =================
 function updateNote(id, value){
   let d = dataList.find(x=>String(x.id)===String(id));
