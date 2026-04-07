@@ -521,9 +521,10 @@ function generatePivot() {
     return;
   }
 
-  const areaFilter = document.getElementById("filter_area")?.value || "";
-const bulanFilter = document.getElementById("filter_bulan")?.value || "";
-const remarkFilter = document.getElementById("filterRemark")?.value || "";
+  // ✅ PAKAI FILTER KHUSUS PIVOT
+  const areaFilter = document.getElementById("filterArea")?.value || "";
+  const bulanFilter = document.getElementById("filterBulan")?.value || "";
+  const remarkFilter = document.getElementById("filterRemark")?.value || "";
 
   const filteredData = dataList.filter(d =>
     d &&
@@ -576,10 +577,9 @@ const remarkFilter = document.getElementById("filterRemark")?.value || "";
     notPaidCount += d.notPaidCount;
   });
 
-  // 🔥 FIX CHART DESTROY
-  if (chartAmount instanceof Chart) {
-    chartAmount.destroy();
-  }
+  // destroy chart lama
+  if (chartAmount instanceof Chart) chartAmount.destroy();
+  if (chartStatus instanceof Chart) chartStatus.destroy();
 
   chartAmount = new Chart(ctx1, {
     type: "bar",
@@ -590,14 +590,8 @@ const remarkFilter = document.getElementById("filterRemark")?.value || "";
         data: Object.values(areaMap)
       }]
     },
-    options: {
-      responsive: true
-    }
+    options: { responsive: true }
   });
-
-  if (chartStatus instanceof Chart) {
-    chartStatus.destroy();
-  }
 
   chartStatus = new Chart(ctx2, {
     type: "bar",
@@ -608,9 +602,7 @@ const remarkFilter = document.getElementById("filterRemark")?.value || "";
         data: [paidCount, notPaidCount]
       }]
     },
-    options: {
-      responsive: true
-    }
+    options: { responsive: true }
   });
 
   renderPivotTable(areaDetail);
