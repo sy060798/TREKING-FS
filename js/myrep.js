@@ -311,11 +311,22 @@ async function hapusTerpilih(){
 
 // ================= EXPORT =================
 function exportExcel(){
-  if(dataList.length===0){ alert("Data kosong"); return; }
-  let ws=XLSX.utils.json_to_sheet(dataList);
-  let wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"DATA");
-  XLSX.writeFile(wb,"data.xlsx");
+  try{
+    if(dataList.length===0){
+      alert("Data kosong");
+      return;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(dataList);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "DATA");
+
+    XLSX.writeFile(wb, "data.xlsx");
+
+  }catch(err){
+    console.error("EXPORT ERROR:", err);
+    alert("Export gagal: " + err.message);
+  }
 }
 
 
