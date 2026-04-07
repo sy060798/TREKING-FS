@@ -17,39 +17,31 @@ function getHarga(area){
   return 200000;
 }
 
-// ================= TAB =================
-function showTab(tabId) {
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-
-  if (tabId === "pivot") {
-    loadFilter();
-    setTimeout(generatePivot, 200);
-  }
-}
-
 document.addEventListener("DOMContentLoaded", function(){
+
+  // default tab
   showTab('data');
-});
 
-// ================= INIT =================
-document.addEventListener("DOMContentLoaded", function(){
+  // ambil element modal
   window.edit_wo = document.getElementById("edit_wo");
   window.edit_area = document.getElementById("edit_area");
   window.edit_stb = document.getElementById("edit_stb");
   window.edit_remark = document.getElementById("edit_remark");
   window.modalEdit = document.getElementById("modalEdit");
 
+  // upload
   let upload = document.getElementById("upload");
   if(upload){
     upload.addEventListener("click", ()=>upload.value=null);
     upload.addEventListener("change", importExcel);
   }
 
+  // checkbox select all
   document.getElementById("checkAll")?.addEventListener("change", function(e){
     document.querySelectorAll("#tableData tbody input[type=checkbox]")
     .forEach(c => c.checked = e.target.checked);
   });
+
 });
 
 
@@ -60,7 +52,9 @@ document.addEventListener("input", function(e){
     e.target.id === "filter_bulan" ||
     e.target.id === "filter_area"
   ){
-    renderTable();
+   renderTable();
+loadFilter();
+generatePivot();
   }
 });
 
@@ -367,6 +361,8 @@ window.addEventListener("load",async function(){
     dataList.forEach(d=>d.server="✔ dari server");
 
     renderTable();
+    loadFilter();
+    generatePivot();
 
   }catch(err){
     console.log("server kosong");
