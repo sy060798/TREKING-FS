@@ -294,26 +294,41 @@ function exportExcel(){
 
 // ================= SERVER =================
 async function kirimKeServer(){
-  if(dataList.length===0){ alert("Data kosong"); return; }
+  if(dataList.length===0){ 
+    alert("Data kosong"); 
+    return; 
+  }
 
-  // 🔥 TAMBAHAN: fix nested
   dataList = dataList.flat();
 
   try{
-    let res=await fetch(`${SERVER_URL}/api/save`,{
+    let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(dataList)
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(dataList)
     });
-    if(!res.ok) throw new Error("Server error");
+
+    let text = await res.text(); // 🔥 penting
+    console.log("RESPONSE SERVER:", text);
+
+    if(!res.ok){
+      throw new Error("Server error: " + text);
+    }
+
     dataList.forEach(d=>d.server="✔ terkirim");
     renderTable();
     loadFilter();
     generatePivot();
-    alert("Berhasil kirim ke server");
-  }catch(err){ console.error(err); alert("Gagal kirim ke server"); }
-}
 
+    alert("Berhasil kirim ke server");
+
+  }catch(err){
+    console.error("DETAIL ERROR:", err);
+    alert("Gagal kirim ke server\n" + err.message);
+  }
+}
 // ================= AUTO LOAD =================
 window.addEventListener("load",async function(){
   try{
