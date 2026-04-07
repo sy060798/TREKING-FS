@@ -309,6 +309,17 @@ async function hapusTerpilih(){
 }
 
 
+// ================= EXPORT =================
+function exportExcel(){
+  if(dataList.length===0){ alert("Data kosong"); return; }
+  let ws=XLSX.utils.json_to_sheet(dataList);
+  let wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"DATA");
+  XLSX.writeFile(wb,"data.xlsx");
+}
+
+
+
 // ================= SERVER =================
 async function kirimKeServer(){
   if(dataList.length===0){ 
