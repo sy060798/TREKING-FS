@@ -53,7 +53,6 @@ document.addEventListener("input", function(e){
     e.target.id === "filter_area"
   ){
    renderTable();
-loadFilter();
 generatePivot();
   }
 });
@@ -110,7 +109,6 @@ function importExcel(e){
     if(duplicateCount>0) alert(duplicateCount+" data duplikat tidak dimasukkan");
 
     renderTable();
-  loadFilter();
   generatePivot();
   };
 
@@ -252,7 +250,6 @@ function saveEdit(){
   }
 
   renderTable();
-  loadFilter();     // 🔥 update filter
   generatePivot();  // 🔥 update chart
   closeModal();
 }
@@ -303,7 +300,6 @@ async function hapusTerpilih(){
   }
 
   renderTable();
-  loadFilter();
   generatePivot();
   
 }
@@ -361,7 +357,6 @@ async function kirimKeServer(){
 
     dataList.forEach(d=>d.server="✔ terkirim");
     renderTable();
-    loadFilter();
     generatePivot();
 
     alert("Berhasil kirim ke server");
@@ -386,7 +381,6 @@ window.addEventListener("load",async function(){
     dataList.forEach(d=>d.server="✔ dari server");
 
     renderTable();
-    loadFilter();
     generatePivot();
 
   }catch(err){
