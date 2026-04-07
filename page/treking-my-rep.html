@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
+<!-- LIB -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -61,19 +62,24 @@ table{
   border-collapse:collapse;
 }
 
-th,td{
+/* 🔥 FIX: jangan pakai pointer di header */
+th{
   padding:6px;
   font-size:12px;
   text-align:center;
   border-bottom:1px solid #444;
-}
-
-/* 🔥 FIX KLIK */
-thead th{
   background:#8e44ad;
   position:sticky;
   top:0;
-  z-index:1;
+  z-index:2;
+}
+
+/* td tetap normal */
+td{
+  padding:6px;
+  font-size:12px;
+  text-align:center;
+  border-bottom:1px solid #444;
 }
 
 .tab{display:none;}
@@ -112,12 +118,20 @@ thead th{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-bottom:10px;
+  margin-bottom:15px;
 }
 
-/* NOTE WIDTH */
-th:nth-child(13), td:nth-child(13){
-  min-width:150px;
+/* 🔥 FIX SELECT BIAR BISA DIKLIK */
+th select{
+  margin-top:4px;
+  width:100%;
+  background:#111;
+  color:white;
+  border:1px solid #555;
+  padding:3px;
+  position:relative;
+  z-index:5;
+  pointer-events:auto;
 }
 
 /* CHART */
@@ -192,14 +206,6 @@ canvas{
 
 <!-- ================= DATA ================= -->
 <div id="data" class="tab active">
-
-  <!-- 🔥 FILTER NOTE PINDAH KE SINI -->
-  <div class="filter-box">
-    <select id="filterNote">
-      <option value="">Semua Note</option>
-    </select>
-  </div>
-
   <div class="table-wrap">
     <table id="tableData">
       <thead>
@@ -216,17 +222,22 @@ canvas{
           <th>DPP</th>
           <th>Amount</th>
           <th>Remark</th>
-          <th>Note</th>
+
+          <!-- ✅ NOTE FIX -->
+          <th>
+            Note
+            <br>
+            <select id="filterNote">
+              <option value="">Semua</option>
+            </select>
+          </th>
+
           <th>Server</th>
           <th>Aksi</th>
         </tr>
       </thead>
 
-      <tbody>
-        <tr>
-          <td colspan="14">Tidak ada data</td>
-        </tr>
-      </tbody>
+      <tbody></tbody>
 
     </table>
   </div>
