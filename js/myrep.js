@@ -275,16 +275,15 @@ function editMassal(){
     return; 
   }
 
-  currentEditId=checked.map(c=>String(c.dataset.id));
+  currentEditId = checked.map(c=>String(c.dataset.id));
 
-  edit_wo.value="";
-  edit_area.value="";
-  edit_stb.value="";
-  edit_remark.value="";
+  document.getElementById("edit_wo").value="";
+  document.getElementById("edit_area").value="";
+  document.getElementById("edit_stb").value="";
+  document.getElementById("edit_remark").value="";
 
-  modalEdit.style.display="flex";
+  document.getElementById("modalEdit").style.display="flex";
 }
-
 // ================= HAPUS =================
 async function hapusTerpilih(){
   let ids=[...document.querySelectorAll("#tableData tbody input:checked")]
@@ -336,42 +335,66 @@ function exportExcel(){
 
 // ================= SERVER =================
 async function kirimKeServer(){
-  if(dataList.length===0){ 
-    alert("Data kosong"); 
-    return; 
+
+  if(dataList.length===0){
+    alert("Data kosong");
+    return;
   }
 
-  dataList = dataList.flat();
+  const chunkSize = 100;
+
+  const progressBox = document.getElementById("progressBox");
+  const progressBar = document.getElementById("progressBar");
+
+  progressBox.style.display = "block";
 
   try{
-    let res = await fetch(`${SERVER_URL}/api/save`,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify(dataList)
-    });
 
-    let text = await res.text(); // 🔥 penting
-    console.log("RESPONSE SERVER:", text);
+    const totalBatch = Math.ceil(dataList.length / chunkSize);
 
-    if(!res.ok){
-      throw new Error("Server error: " + text);
+    for(let i=0; i<dataList.length; i+=chunkSize){
+
+      const chunk = dataList.slice(i, i+chunkSize);
+
+      let res = await fetch(`${SERVER_URL}/api/save`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify(chunk)
+      });
+
+      if(!res.ok){
+        let text = await res.text();
+        throw new Error(text);
+      }
+
+      // 🔥 HITUNG PROGRESS
+      let currentBatch = (i / chunkSize) + 1;
+      let percent = Math.round((currentBatch / totalBatch) * 100);
+
+      progressBar.style.width = percent + "%";
+      progressBar.innerText = percent + "%";
+
+      console.log(`Batch ${currentBatch}/${totalBatch} (${percent}%)`);
+
+      // optional delay biar smooth
+      await new Promise(r => setTimeout(r, 200));
     }
 
     dataList.forEach(d=>d.server="✔ terkirim");
+
     renderTable();
-    loadFilter();
     generatePivot();
 
-    alert("Berhasil kirim ke server");
+    progressBar.innerText = "100% ✔";
+    alert("Semua data berhasil dikirim 🚀");
 
   }catch(err){
-    console.error("DETAIL ERROR:", err);
-    alert("Gagal kirim ke server\n" + err.message);
+    console.error(err);
+    alert("Gagal kirim: " + err.message);
   }
 }
-
 // ================= AUTO LOAD =================
 window.addEventListener("load",async function(){
   try{
