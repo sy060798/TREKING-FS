@@ -121,8 +121,17 @@ thead select{
 .filter-box{
   display:flex;
   gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:15px;
+  flex-wrap:wrap; 
+  align-items:center;
+}
+
+.filter-box input{
+  width:140px; 
+  padding:6px 10px;
+  border-radius:6px;
+  border:1px solid #555;
+  background:#222;
+  color:white;
 }
 
 /* NOTE WIDTH */
@@ -264,6 +273,9 @@ canvas{
 </div>
 
 <!-- BUTTON -->
+<div class="top-bar">
+
+  <!-- BUTTON (ATAS) -->
 <div class="btn-group">
   <button class="blue" onclick="exportExcel()">⬇ Download</button>
   <button class="orange" onclick="triggerUpload()">⬆ Upload</button>
@@ -274,6 +286,13 @@ canvas{
   <input type="file" id="upload" accept=".xlsx,.xls">
 </div>
 
+<!-- FILTER (DI BAWAHNYA, TAPI HORIZONTAL) -->
+<div class="filter-box">
+  <input type="text" id="filter_wo" placeholder="WO">
+  <input type="text" id="filter_bulan" placeholder="Bulan">
+  <input type="text" id="filter_area" placeholder="Area">
+</div>
+  
 <!-- ================= DATA ================= -->
 <div id="data" class="tab active">
   <div class="table-wrap">
@@ -295,17 +314,6 @@ canvas{
           <th>Remark</th>
 
           <!-- 🔥 NOTE + FILTER -->
-          <th>WO<br>
-          <input type="text" id="filter_wo" placeholder="Cari WO">
-            </th>
-
-          <th>Bulan<br>
-            <input type="text" id="filter_bulan" placeholder="Cari Bulan">
-            </th>
-
-          <th>Area<br>
-            <input type="text" id="filter_area" placeholder="Cari Area">
-                </th>
           <th>
             Note
             <select id="filterNote">
