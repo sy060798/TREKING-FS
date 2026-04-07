@@ -86,8 +86,16 @@ thead select{
   pointer-events:auto;
 }
 
-.tab{display:none;}
-.active{display:block;}
+.tab{
+  display:none;
+  position:relative;
+  z-index:1;
+}
+
+.tab.active{
+  display:block;
+  z-index:5;
+}
 
 #modalEdit{
   display:none;
@@ -177,6 +185,7 @@ th:nth-child(13), td:nth-child(13){
 canvas{
   width: 100% !important;
   height: 260px !important;
+  pointer-events:none; 
 }
 
 /* ==================== WRAPPER PIVOT ==================== */
