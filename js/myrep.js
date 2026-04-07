@@ -601,3 +601,21 @@ function generatePivot() {
 
   renderPivotTable(areaDetail);
 }
+
+function showTab(tabName){
+  document.querySelectorAll(".tab").forEach(tab=>{
+    tab.classList.remove("active");
+  });
+
+  const el = document.getElementById(tabName);
+  if(el){
+    el.classList.add("active");
+  }
+
+  // refresh pivot biar aman
+  setTimeout(()=>{
+    if(typeof generatePivot === "function"){
+      generatePivot();
+    }
+  },100);
+}
