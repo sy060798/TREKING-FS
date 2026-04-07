@@ -197,6 +197,15 @@ function closeModal(){
   currentEditId=null;
 }
 
+// ================= EDIT MASSAL =================
+function editMassal(){
+  let checked=[...document.querySelectorAll("#tableData tbody input:checked")];
+  if(checked.length===0){ alert("Pilih data dulu"); return; }
+  currentEditId=checked.map(c=>String(c.dataset.id));
+  modalEdit.style.display="flex";
+}
+
+
 // ================= HAPUS =================
 async function hapusTerpilih(){
   let ids=[...document.querySelectorAll("#tableData tbody input:checked")]
