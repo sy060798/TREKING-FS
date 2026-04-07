@@ -17,7 +17,7 @@ function getHarga(area){
   return 200000;
 }
 
-// ================= TAB =================
+// ==================== TAB SWITCH ====================
 function showTab(tabId) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.getElementById(tabId)?.classList.add('active');
@@ -31,8 +31,9 @@ function showTab(tabId) {
   }
 }
 
-// ================= INIT =================
+// ================= INIT ==================
 document.addEventListener("DOMContentLoaded", function(){
+  showTab('data');
 
   window.edit_wo = document.getElementById("edit_wo");
   window.edit_area = document.getElementById("edit_area");
@@ -94,7 +95,6 @@ function importExcel(e){
           note: "", // 🔥 TAMBAHAN
           server: "-"
         });
-
       });
     });
 
@@ -107,10 +107,20 @@ function importExcel(e){
   reader.readAsBinaryString(file);
 }
 
+// ================= UPDATE NOTE LANGSUNG =================
+function updateNote(id, value){
+  let d = dataList.find(x => String(x.id) === String(id));
+  if(d){
+    d.note = value;
+    loadFilter();
+  }
+}
+
 // ================= RENDER =================
 function renderTable(){
   let tbody = document.querySelector("#tableData tbody");
-  tbody.innerHTML="";
+  if(!tbody) return;
+  tbody.innerHTML = "";
 
   if(dataList.length===0){
     tbody.innerHTML=`<tr><td colspan="14">Tidak ada data</td></tr>`;
@@ -118,14 +128,14 @@ function renderTable(){
   }
 
   dataList.forEach((d,i)=>{
-    let tr=document.createElement("tr");
+    let tr = document.createElement("tr");
     tr.innerHTML=`
       <td>${i+1}</td>
       <td><input type="checkbox" data-id="${d.id}"></td>
       <td>${d.id}</td>
       <td>${d.wo}</td>
       <td>${formatTanggalExcel(d.tanggal)}</td>
-      <td>${d.month||"-"}</td>
+      <td>${d.month || "-"}</td>
       <td>${d.area}</td>
       <td>${d.wotype}</td>
       <td>${d.stb}</td>
@@ -133,8 +143,12 @@ function renderTable(){
       <td>${d.amount}</td>
       <td>${d.remark}</td>
 
-      <!-- 🔥 NOTE TIDAK DITAMPILKAN VALUE -->
-      <td>${d.note || "-"}</td>
+      <!-- 🔥 NOTE LANGSUNG KETIK -->
+      <td>
+        <input value="${d.note || ''}" 
+        oninput="updateNote('${d.id}', this.value)"
+        style="width:140px;background:#111;color:#fff;border:1px solid #555;">
+      </td>
 
       <td>${d.server}</td>
       <td><button onclick="editData('${d.id}')">✏</button></td>
@@ -146,66 +160,42 @@ function renderTable(){
 // ================= EDIT =================
 function editData(id){
   currentEditId=id;
-  let d=dataList.find(x=>String(x.id)===String(id));
+  let d = dataList.find(x=>String(x.id)===String(id));
   if(!d) return;
-
   edit_wo.value=d.wo;
   edit_area.value=d.area;
   edit_stb.value=d.stb;
-
-  // 🔥 remark + note digabung
-  edit_remark.value = d.remark;
-
+  edit_remark.value=d.remark;
   modalEdit.style.display="flex";
 }
 
 // ================= SAVE =================
 function saveEdit(){
+  let d=dataList.find(x=>String(x.id)===String(currentEditId));
+  if(!d) return;
 
-  if(Array.isArray(currentEditId)){
-    dataList.forEach(d=>{
-      if(currentEditId.includes(String(d.id))){
-        d.remark = edit_remark.value || d.remark;
-        d.note = edit_remark.value || d.note; // 🔥 NOTE IKUT
-      }
-    });
-  }else{
-    let d=dataList.find(x=>String(x.id)===String(currentEditId));
-    if(!d) return;
+  d.wo=edit_wo.value;
+  d.area=edit_area.value;
+  d.stb=parseInt(edit_stb.value)||0;
 
-    d.wo=edit_wo.value;
-    d.area=edit_area.value;
-    d.stb=parseInt(edit_stb.value)||0;
+  let harga=getHarga(d.area);
+  d.dpp=harga+(d.stb*50000);
+  d.amount=Math.round(d.dpp*1.11);
 
-    let harga=getHarga(d.area);
-    d.dpp=harga+(d.stb*50000);
-    d.amount=Math.round(d.dpp*1.11);
-
-    d.remark=edit_remark.value;
-    d.note=edit_remark.value; // 🔥 NOTE
-  }
+  d.remark=edit_remark.value;
 
   renderTable();
-  loadFilter();
   closeModal();
 }
 
-function closeModal(){
-  modalEdit.style.display="none";
-  currentEditId=null;
-}
+function closeModal(){ modalEdit.style.display="none"; }
 
-// ================= FILTER =================
+// ================= FILTER NOTE =================
 function loadFilter(){
-
   const noteSet = new Set();
-
-  dataList.forEach(d=>{
-    if(d.note) noteSet.add(d.note);
-  });
+  dataList.forEach(d => d.note && noteSet.add(d.note));
 
   const filterNote = document.getElementById("filterNote");
-
   if(filterNote){
     filterNote.innerHTML =
       `<option value="">Semua</option>` +
@@ -213,46 +203,48 @@ function loadFilter(){
   }
 }
 
-document.addEventListener("change",function(e){
-  if(e.target.id==="filterNote"){
-    renderTableFiltered();
-    generatePivot();
+document.addEventListener("change", function(e){
+  if(e.target.id === "filterNote"){
+    let val = e.target.value;
+    if(!val) return renderTable();
+
+    let tbody = document.querySelector("#tableData tbody");
+    tbody.innerHTML = "";
+
+    dataList.filter(d => d.note === val).forEach((d,i)=>{
+      let tr=document.createElement("tr");
+      tr.innerHTML=`<td>${i+1}</td><td>${d.wo}</td><td>${d.note}</td>`;
+      tbody.appendChild(tr);
+    });
   }
 });
 
-// ================= FILTER TABLE =================
-function renderTableFiltered(){
+// ================= SERVER =================
+async function kirimKeServer(){
+  if(dataList.length===0){ alert("Data kosong"); return; }
 
-  let noteFilter = document.getElementById("filterNote")?.value || "";
+  try{
+    let clean = dataList.map(d=>({...d, note:d.note||""}));
 
-  let filtered = dataList.filter(d =>
-    !noteFilter || d.note === noteFilter
-  );
+    let res = await fetch(`${SERVER_URL}/api/save`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(clean)
+    });
 
-  let tbody=document.querySelector("#tableData tbody");
-  tbody.innerHTML="";
+    let text = await res.text();
+    console.log(text);
 
-  filtered.forEach((d,i)=>{
-    let tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${i+1}</td>
-      <td><input type="checkbox" data-id="${d.id}"></td>
-      <td>${d.id}</td>
-      <td>${d.wo}</td>
-      <td>${formatTanggalExcel(d.tanggal)}</td>
-      <td>${d.month}</td>
-      <td>${d.area}</td>
-      <td>${d.wotype}</td>
-      <td>${d.stb}</td>
-      <td>${d.dpp}</td>
-      <td>${d.amount}</td>
-      <td>${d.remark}</td>
-      <td>${d.note||"-"}</td>
-      <td>${d.server}</td>
-      <td><button onclick="editData('${d.id}')">✏</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
+    if(!res.ok) throw new Error(text);
+
+    dataList.forEach(d=>d.server="✔ terkirim");
+    renderTable();
+
+    alert("Berhasil kirim ke server");
+
+  }catch(err){
+    alert("Gagal server:\n"+err.message);
+  }
 }
 
 // ================= FORMAT =================
