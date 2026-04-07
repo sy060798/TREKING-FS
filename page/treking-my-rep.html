@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Treking My Rep</title>
 
-<!-- LIB -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -17,6 +16,7 @@ body{
   padding:20px;
 }
 h2{text-align:center;}
+
 .menu{
   display:flex;
   gap:10px;
@@ -30,12 +30,14 @@ h2{text-align:center;}
   border-radius:6px;
   cursor:pointer;
 }
+
 .btn-group{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
   margin-bottom:15px;
 }
+
 button{
   padding:8px 12px;
   border:none;
@@ -66,10 +68,12 @@ th,td{
   border-bottom:1px solid #444;
 }
 
+/* 🔥 FIX KLIK */
 thead th{
   background:#8e44ad;
   position:sticky;
   top:0;
+  z-index:1;
 }
 
 .tab{display:none;}
@@ -108,7 +112,7 @@ thead th{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 
 /* NOTE WIDTH */
@@ -157,12 +161,6 @@ canvas{
   top:0;
 }
 
-.table-wrapper th,
-.table-wrapper td{
-  padding:8px;
-  border-bottom:1px solid #444;
-}
-
 .total-row{
   background:#111;
   font-weight:bold;
@@ -194,6 +192,14 @@ canvas{
 
 <!-- ================= DATA ================= -->
 <div id="data" class="tab active">
+
+  <!-- 🔥 FILTER NOTE PINDAH KE SINI -->
+  <div class="filter-box">
+    <select id="filterNote">
+      <option value="">Semua Note</option>
+    </select>
+  </div>
+
   <div class="table-wrap">
     <table id="tableData">
       <thead>
@@ -210,15 +216,7 @@ canvas{
           <th>DPP</th>
           <th>Amount</th>
           <th>Remark</th>
-
-          <!-- 🔥 TAMBAHAN NOTE -->
-          <th>
-            Note<br>
-            <select id="filterNote">
-              <option value="">Semua Note</option>
-            </select>
-          </th>
-
+          <th>Note</th>
           <th>Server</th>
           <th>Aksi</th>
         </tr>
