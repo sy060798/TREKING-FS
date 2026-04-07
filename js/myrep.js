@@ -103,7 +103,8 @@ function importExcel(e){
     if(duplicateCount>0) alert(duplicateCount+" data duplikat tidak dimasukkan");
 
     renderTable();
-    loadFilter();
+  loadFilter();
+  generatePivot();
   };
 
   reader.readAsBinaryString(file);
@@ -175,20 +176,65 @@ function editData(id){
   modalEdit.style.display="flex";
 }
 
+// ================= SAVE EDIT =================
+function saveEdit(){
+
+  // 🔥 MASS EDIT
+  if(Array.isArray(currentEditId)){
+
+    dataList.forEach(d=>{
+      if(currentEditId.includes(String(d.id))){
+
+        if(edit_wo.value) d.wo = edit_wo.value;
+        if(edit_area.value) d.area = edit_area.value;
+        if(edit_stb.value) d.stb = parseInt(edit_stb.value)||0;
+        if(edit_remark.value) d.remark = edit_remark.value;
+
+        let harga=getHarga(d.area);
+        d.dpp=harga+(d.stb*50000);
+        d.amount=Math.round(d.dpp*1.11);
+      }
+    });
+
+  } else {
+
+    // 🔥 SINGLE EDIT
+    let d=dataList.find(x=>String(x.id)===String(currentEditId));
+    if(!d) return;
+
+    d.wo=edit_wo.value;
+    d.area=edit_area.value;
+    d.stb=parseInt(edit_stb.value)||0;
+
+    let harga=getHarga(d.area);
+    d.dpp=harga+(d.stb*50000);
+    d.amount=Math.round(d.dpp*1.11);
+    d.remark=edit_remark.value;
+  }
+
+  renderTable();
+  loadFilter();
+  generatePivot();
+  closeModal();
+}
+
 // ================= EDIT MASSAL =================
 function editMassal(){
   let checked=[...document.querySelectorAll("#tableData tbody input:checked")];
-  if(checked.length===0){ alert("Pilih data dulu"); return; }
+  if(checked.length===0){ 
+    alert("Pilih data dulu"); 
+    return; 
+  }
 
   currentEditId=checked.map(c=>String(c.dataset.id));
 
-  // kosongin input kecuali remark
   edit_wo.value="";
   edit_area.value="";
   edit_stb.value="";
   edit_remark.value="";
 
   modalEdit.style.display="flex";
+}
 
 // ================= HAPUS =================
 async function hapusTerpilih(){
@@ -208,6 +254,9 @@ async function hapusTerpilih(){
   }
 
   renderTable();
+  loadFilter();
+  generatePivot();
+  
 }
 
 
