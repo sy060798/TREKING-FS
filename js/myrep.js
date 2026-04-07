@@ -17,7 +17,7 @@ function getHarga(area){
   return 200000;
 }
 
-// ==================== TAB SWITCH ====================
+// ================= TAB =================
 function showTab(tabId) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.getElementById(tabId)?.classList.add('active');
@@ -31,7 +31,7 @@ function showTab(tabId) {
   }
 }
 
-// ================= INIT ==================
+// ================= INIT =================
 document.addEventListener("DOMContentLoaded", function(){
   showTab('data');
 
@@ -42,13 +42,18 @@ document.addEventListener("DOMContentLoaded", function(){
   window.modalEdit = document.getElementById("modalEdit");
 
   let upload = document.getElementById("upload");
-  upload?.addEventListener("click", ()=>upload.value=null);
-  upload?.addEventListener("change", importExcel);
+  if(upload){
+    upload.addEventListener("click", ()=>upload.value=null);
+    upload.addEventListener("change", importExcel);
+  }
 
-  document.getElementById("checkAll")?.addEventListener("change", e=>{
-    document.querySelectorAll("#tableData tbody input[type=checkbox]")
-    .forEach(c=>c.checked=e.target.checked);
-  });
+  let checkAll = document.getElementById("checkAll");
+  if(checkAll){
+    checkAll.addEventListener("change", function(e){
+      document.querySelectorAll("#tableData tbody input[type=checkbox]")
+      .forEach(c => c.checked = e.target.checked);
+    });
+  }
 });
 
 // ================= IMPORT =================
@@ -59,55 +64,70 @@ function importExcel(e){
   let reader = new FileReader();
 
   reader.onload = function(evt){
-    let wb = XLSX.read(evt.target.result,{type:'binary'});
-    let duplicateCount = 0;
+    try{
+      let wb = XLSX.read(evt.target.result,{type:'binary'});
+      let duplicateCount = 0;
 
-    wb.SheetNames.forEach(s=>{
-      let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
+      wb.SheetNames.forEach(s=>{
+        let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
 
-      json.forEach(r=>{
-        let woBaru = (r.WO || "").toString().trim();
-        let areaBaru = (r.AREA || "").toString().trim();
-        let bulanBaru = (r.MONTH || "").toString().trim();
+        json.forEach(r=>{
 
-        let sudahAda = dataList.some(d =>
-          d.wo === woBaru && d.area === areaBaru && d.month === bulanBaru
-        );
+          let woBaru = (r.WO || "").toString().trim();
+          let areaBaru = (r.AREA || "").toString().trim();
+          let bulanBaru = (r.MONTH || "").toString().trim();
 
-        if(sudahAda){ duplicateCount++; return; }
+          let sudahAda = dataList.some(d => 
+            (d.wo||"")===woBaru &&
+            (d.area||"")===areaBaru &&
+            (d.month||"")===bulanBaru
+          );
 
-        let stb = parseInt(r.STB)||0;
-        let harga = getHarga(areaBaru);
-        let dpp = harga + (stb*50000);
+          if(sudahAda){
+            duplicateCount++;
+            return;
+          }
 
-        dataList.push({
-          id: r.ID||Date.now()+Math.random(),
-          wo: woBaru,
-          area: areaBaru,
-          wotype: r["WO TYPE"]||"",
-          tahun: r.TAHUN||"",
-          month: bulanBaru,
-          tanggal: r.TANGGALPENGERJAAN||"",
-          stb: stb,
-          dpp: dpp,
-          amount: Math.round(dpp*1.11),
-          remark: "NOT PAID",
-          note: "", // 🔥 TAMBAHAN
-          server: "-"
+          let stb = parseInt(r.STB)||0;
+          let harga = getHarga(areaBaru);
+          let dpp = harga + (stb*50000);
+
+          dataList.push({
+            id: r.ID||Date.now()+Math.random(),
+            wo: woBaru,
+            area: areaBaru,
+            wotype: r["WO TYPE"]||"",
+            tahun: r.TAHUN||"",
+            month: bulanBaru,
+            tanggal: r.TANGGALPENGERJAAN||"",
+            stb: stb,
+            dpp: dpp,
+            amount: Math.round(dpp*1.11),
+            remark: "NOT PAID",
+            note: "", // 🔥 TAMBAHAN
+            server: "-"
+          });
+
         });
       });
-    });
 
-    if(duplicateCount>0) alert(duplicateCount+" data duplikat");
+      if(duplicateCount > 0){
+        alert(duplicateCount + " data duplikat tidak dimasukkan");
+      }
 
-    renderTable();
-    loadFilter();
+      renderTable();
+      loadFilter();
+
+    }catch(err){
+      console.error(err);
+      alert("Gagal baca file");
+    }
   };
 
   reader.readAsBinaryString(file);
 }
 
-// ================= UPDATE NOTE LANGSUNG =================
+// ================= UPDATE NOTE =================
 function updateNote(id, value){
   let d = dataList.find(x => String(x.id) === String(id));
   if(d){
@@ -117,17 +137,19 @@ function updateNote(id, value){
 }
 
 // ================= RENDER =================
-function renderTable(){
+function renderTable(data = dataList){
   let tbody = document.querySelector("#tableData tbody");
   if(!tbody) return;
   tbody.innerHTML = "";
 
-  if(dataList.length===0){
+  if(data.length===0){
     tbody.innerHTML=`<tr><td colspan="14">Tidak ada data</td></tr>`;
     return;
   }
 
-  dataList.forEach((d,i)=>{
+  data.forEach((d,i)=>{
+    if(!d) return;
+
     let tr = document.createElement("tr");
     tr.innerHTML=`
       <td>${i+1}</td>
@@ -143,11 +165,12 @@ function renderTable(){
       <td>${d.amount}</td>
       <td>${d.remark}</td>
 
-      <!-- 🔥 NOTE LANGSUNG KETIK -->
+      <!-- NOTE -->
       <td>
-        <input value="${d.note || ''}" 
-        oninput="updateNote('${d.id}', this.value)"
-        style="width:140px;background:#111;color:#fff;border:1px solid #555;">
+        <input 
+          value="${d.note || ''}"
+          oninput="updateNote('${d.id}', this.value)"
+          style="width:140px;background:#111;color:#fff;border:1px solid #555;">
       </td>
 
       <td>${d.server}</td>
@@ -156,6 +179,38 @@ function renderTable(){
     tbody.appendChild(tr);
   });
 }
+
+// ================= FILTER NOTE =================
+function loadFilter(){
+  const noteSet = new Set();
+
+  dataList.forEach(d=>{
+    if(d.note) noteSet.add(d.note);
+  });
+
+  const filterNote = document.getElementById("filterNote");
+
+  if(filterNote){
+    filterNote.innerHTML =
+      `<option value="">Semua</option>` +
+      [...noteSet].map(n=>`<option value="${n}">${n}</option>`).join("");
+  }
+}
+
+document.addEventListener("change", function(e){
+  if(e.target.id === "filterNote"){
+
+    let val = e.target.value;
+
+    if(!val){
+      renderTable();
+      return;
+    }
+
+    let filtered = dataList.filter(d => d.note === val);
+    renderTable(filtered);
+  }
+});
 
 // ================= EDIT =================
 function editData(id){
@@ -190,52 +245,43 @@ function saveEdit(){
 
 function closeModal(){ modalEdit.style.display="none"; }
 
-// ================= FILTER NOTE =================
-function loadFilter(){
-  const noteSet = new Set();
-  dataList.forEach(d => d.note && noteSet.add(d.note));
-
-  const filterNote = document.getElementById("filterNote");
-  if(filterNote){
-    filterNote.innerHTML =
-      `<option value="">Semua</option>` +
-      [...noteSet].map(n=>`<option value="${n}">${n}</option>`).join("");
-  }
-}
-
-document.addEventListener("change", function(e){
-  if(e.target.id === "filterNote"){
-    let val = e.target.value;
-    if(!val) return renderTable();
-
-    let tbody = document.querySelector("#tableData tbody");
-    tbody.innerHTML = "";
-
-    dataList.filter(d => d.note === val).forEach((d,i)=>{
-      let tr=document.createElement("tr");
-      tr.innerHTML=`<td>${i+1}</td><td>${d.wo}</td><td>${d.note}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-});
-
 // ================= SERVER =================
 async function kirimKeServer(){
-  if(dataList.length===0){ alert("Data kosong"); return; }
+  if(dataList.length===0){ 
+    alert("Data kosong"); 
+    return; 
+  }
 
   try{
-    let clean = dataList.map(d=>({...d, note:d.note||""}));
+
+    let cleanData = dataList.map(d => ({
+      id: d.id,
+      wo: d.wo,
+      area: d.area,
+      wotype: d.wotype,
+      tahun: d.tahun,
+      month: d.month,
+      tanggal: d.tanggal,
+      stb: d.stb,
+      dpp: d.dpp,
+      amount: d.amount,
+      remark: d.remark
+    }));
 
     let res = await fetch(`${SERVER_URL}/api/save`,{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(clean)
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(cleanData)
     });
 
     let text = await res.text();
-    console.log(text);
+    console.log("SERVER:", text);
 
-    if(!res.ok) throw new Error(text);
+    if(!res.ok){
+      throw new Error(text);
+    }
 
     dataList.forEach(d=>d.server="✔ terkirim");
     renderTable();
@@ -243,7 +289,8 @@ async function kirimKeServer(){
     alert("Berhasil kirim ke server");
 
   }catch(err){
-    alert("Gagal server:\n"+err.message);
+    console.error(err);
+    alert("Gagal kirim:\n"+err.message);
   }
 }
 
