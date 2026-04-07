@@ -311,6 +311,11 @@ async function hapusTerpilih(){
 
 // ================= EXPORT =================
 function exportExcel(){
+  if(typeof XLSX === "undefined"){
+    alert("Library XLSX belum load!");
+    return;
+  }
+
   try{
     if(dataList.length===0){
       alert("Data kosong");
@@ -328,8 +333,6 @@ function exportExcel(){
     alert("Export gagal: " + err.message);
   }
 }
-
-
 
 // ================= SERVER =================
 async function kirimKeServer(){
@@ -518,9 +521,9 @@ function generatePivot() {
     return;
   }
 
-  const areaFilter = document.getElementById("filterArea")?.value || "";
-  const bulanFilter = document.getElementById("filterBulan")?.value || "";
-  const remarkFilter = document.getElementById("filterRemark")?.value || "";
+  const areaFilter = document.getElementById("filter_area")?.value || "";
+const bulanFilter = document.getElementById("filter_bulan")?.value || "";
+const remarkFilter = document.getElementById("filterRemark")?.value || "";
 
   const filteredData = dataList.filter(d =>
     d &&
