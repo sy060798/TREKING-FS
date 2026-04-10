@@ -648,3 +648,72 @@ function showTab(tabName){
     }
   },100);
 }
+
+
+// ================= UPLOAD PAYMENT (TAMBAHAN TANPA UBAH SISTEM LAMA) =================
+
+// trigger tombol
+function triggerUploadPayment(){
+  document.getElementById('uploadPayment').click();
+}
+
+// event listener upload payment
+document.addEventListener("DOMContentLoaded", function(){
+  let uploadPayment = document.getElementById("uploadPayment");
+  if(uploadPayment){
+    uploadPayment.addEventListener("click", ()=>uploadPayment.value=null);
+    uploadPayment.addEventListener("change", importPayment);
+  }
+});
+
+// fungsi baca file payment
+function importPayment(e){
+  let file = e.target.files[0];
+  if(!file){ 
+    alert("File payment tidak ada"); 
+    return; 
+  }
+
+  let reader = new FileReader();
+
+  reader.onload = function(evt){
+    let wb = XLSX.read(evt.target.result,{type:'binary'});
+    let matchCount = 0;
+
+    wb.SheetNames.forEach(s=>{
+      let json = XLSX.utils.sheet_to_json(wb.Sheets[s]);
+
+      json.forEach(r=>{
+
+        let idPay = String(r.ID || "").trim();
+        let woPay = String(r.WO || "").trim();
+
+        let found = dataList.find(d =>
+          String(d.id) === idPay ||
+          String(d.wo).trim() === woPay
+        );
+
+        if(found){
+          found.remark = "PAID";
+
+          if(r.NOTE){
+            found.note = r.NOTE;
+          } else {
+            found.note = "AUTO PAID (PYMNT)";
+          }
+
+          matchCount++;
+        }
+
+      });
+    });
+
+    alert(matchCount + " data berhasil jadi PAID");
+
+    renderTable();
+    loadFilter();
+    generatePivot();
+  };
+
+  reader.readAsBinaryString(file);
+}
