@@ -13,7 +13,7 @@ function getHarga(area){
   if(a.includes("surabaya")) return 280000;
   if(a.includes("pamatang siantar")) return 245000;
   if(a.includes("deli serdang")) return 260000;
-  if(a.includes("south fo")) return 300000;
+  if(a.includes("jakarta selatan")) return 300000;
   return 200000;
 }
 
